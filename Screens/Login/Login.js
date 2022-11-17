@@ -11,116 +11,135 @@ import {
 } from 'react-native';
 import {useEffect, useRef} from 'react';
 import {Animated, Easing, Dimensions} from 'react-native';
+import {Shadow} from 'react-native-shadow-2';
 // import LottieView from 'lottie-react-native';
-import {images, icons, theme} from '../../constants/index.js';
+import {images, icons, theme, COLORS, SIZES} from '../../constants/index.js';
 import Loginani from './loginanimation';
 import Signup from './signup';
+import FormInfo from './FormInfo.js';
 import TabLayout from 'react-native-simple-tablayout';
 const {width} = Dimensions.get('window');
 
-const Login = ({navigation}) => {
+const Login = ({navigation, params}) => {
   const motion = useRef(new Animated.Value(-200)).current;
   const motion1 = useRef(new Animated.Value(-200)).current;
   const motion2 = useRef(new Animated.Value(-200)).current;
+  const motion3 = useRef(new Animated.Value(-200)).current;
   const spinValue = useRef(new Animated.Value(0)).current;
-  const tabName = ['Login', 'Signup'];
-  const Screen1 = () => {
-    return (
-      <View
-        style={{
-          flex: 1,
-          width,
-          justifyContent: 'center',
-          backgroundColor: '#FFFFFF',
-        }}>
-        <Loginani />
-      </View>
-    );
-  };
+  const topMotion = useRef(new Animated.Value(900)).current;
+  // const tabName = ['Login', 'Signup'];
+  // const Screen1 = () => {
+  //   return (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         width,
+  //         justifyContent: 'center',
+  //         backgroundColor: '#FFFFFF',
+  //       }}>
+  //       <Loginani />
+  //     </View>
+  //   );
+  // };
 
-  const Screen2 = props => {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          width,
-          backgroundColor: props.color,
-          justifyContent: 'center',
-        }}>
-        <Signup />
-      </View>
-    );
-  };
-  //tab screen passed as array of screens
-  const data = [<Screen1 />, <Screen2 />];
-  const topMotion = useRef(new Animated.Value(100)).current;
+  // const Screen2 = props => {
+  //   return (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         alignItems: 'center',
+  //         width,
+  //         backgroundColor: props.color,
+  //         justifyContent: 'center',
+  //       }}>
+  //       <Signup />
+  //     </View>
+  //   );
+  // };
+  // //tab screen passed as array of screens
+  // const data = [<Screen1 />, <Screen2 />];
+  // const topMotion = useRef(new Animated.Value(100)).current;
   useEffect(() => {
     setTimeout(() => {
       Animated.parallel([
+        Animated.timing(topMotion, {
+          toValue: 420,
+          duration: 400,
+          useNativeDriver: false,
+          easing: Easing.cubic,
+        }),
         Animated.timing(motion, {
-          toValue: 20,
+          toValue: 70,
           duration: 2000,
           useNativeDriver: false,
           easing: Easing.bounce,
         }),
         Animated.timing(motion1, {
-          toValue: 20,
-          duration: 1500,
+          toValue: 70,
+          duration: 1000,
           useNativeDriver: false,
           easing: Easing.bounce,
         }),
         Animated.timing(motion2, {
-          toValue: 20,
+          toValue: 70,
           duration: 2000,
           useNativeDriver: false,
           easing: Easing.bounce,
         }),
-        // Animated.loop(
-        //   Animated.sequence([
-        //     Animated.timing(spinValue, {
-        //       toValue: 1,
-        //       duration: 500,
-        //       useNativeDriver: false,
-        //       easing: Easing.linear,
-        //     }),
+        Animated.timing(motion3, {
+          toValue: 10,
+          duration: 800,
+          useNativeDriver: false,
+          easing: Easing.cubic,
+        }),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(spinValue, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: false,
+              easing: Easing.linear,
+            }),
 
-        //     Animated.timing(spinValue, {
-        //       toValue: -1,
-        //       duration: 1000,
-        //       useNativeDriver: false,
-        //       easing: Easing.linear,
-        //     }),
+            Animated.timing(spinValue, {
+              toValue: -1,
+              duration: 800,
+              useNativeDriver: false,
+              easing: Easing.linear,
+            }),
 
-        //     Animated.timing(spinValue, {
-        //       toValue: 0,
-        //       duration: 500,
-        //       useNativeDriver: false,
-        //       easing: Easing.linear,
-        //     }),
-        //   ]),
-        // ),
+            Animated.timing(spinValue, {
+              toValue: 0,
+              duration: 400,
+              useNativeDriver: false,
+              easing: Easing.linear,
+            }),
+          ]),
+        ),
       ]).start();
     });
   });
-  // const spin = spinValue.interpolate({
-  //   inputRange: [-1, 0, 1],
-  //   outputRange: ['-25deg', '0deg', '25deg'],
-  // });
+  const spin = spinValue.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: ['-15deg', '0deg', '15deg'],
+  });
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
-        source={images.bg_1}
-        style={{width: '100%', height: '103%', flex: 1.2}}>
+        source={images.featured_bg_image}
+        style={{width: '100%', height: '100%', flex: 1.2}}>
         <View style={styles.container}>
           <Animated.Image
-            source={images.work}
+            source={images.Education3}
             style={{
               width: 80,
               height: 80,
               marginTop: 50,
               textAlign: 'center',
               justifyContent: 'center',
+              borderRadius: 80,
+              backgroundColor: 'transparent',
+              transform: [{rotate: spin}],
             }}
           />
 
@@ -135,11 +154,11 @@ const Login = ({navigation}) => {
           marginTop: -25,
           flex: 2.8,
           backgroundColor: '#FFFFFF',
-          borderTopLeftRadius: 35,
-          borderTopRightRadius: 35,
+          borderTopLeftRadius: 45,
+          borderTopRightRadius: 45,
         }}>
-        <View style={{backgroundColor: '#FFFFFF', marginTop: 20}}>
-          <TabLayout
+        {/* <View style={{backgroundColor: '#FFFFFF', marginTop: 20}}> */}
+        {/* <TabLayout
             style={{backgroundColor: '#FFFFFF'}}
             screens={data}
             tabName={tabName}
@@ -152,8 +171,62 @@ const Login = ({navigation}) => {
             tabHeight={50}
             marginTop={100}
             tabColor={'#FFFFFF'}
-          />
-        </View>
+          /> */}
+        <Shadow style={{position: 'relative'}}>
+          <View
+            style={{
+              flex: 1,
+              width: 395,
+              position: 'relative',
+              // paddingHorizontal: SIZES.padding,
+              // paddingVertical: SIZES.radius,
+              // borderRadius: SIZES.radius,
+              backgroundColor: '#FFFFFF',
+              // marginLeft: 30,
+              borderTopLeftRadius: 40,
+              borderTopRightRadius: 40,
+            }}>
+            <Animated.View
+              style={{
+                // flex: 1,
+                justifyContent: 'center',
+                alignSelf: 'center',
+                position: 'absolute',
+                bottom: topMotion,
+                textAlign: 'center',
+                alignItems: 'center',
+                // borderColor: 'green',
+                width: '100%',
+                height: 30,
+                // backgroundColor: 'red',
+                // marginLeft: -25,
+              }}>
+              <View
+                style={{
+                  textAlign: 'center',
+                  justifyContent: 'center',
+                  marginTop: -10,
+                  position: 'relative',
+                }}>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    justifyContent: 'center',
+                    fontWeight: '400',
+                    fontSize: 18,
+                    fontStyle: 'italic',
+                    color: COLORS.primary3,
+                    // position: 'absolute',
+                    // zIndex: 1,
+                  }}>
+                  Đăng Nhập Hệ Thống
+                </Text>
+              </View>
+            </Animated.View>
+            <Loginani />
+          </View>
+        </Shadow>
+        {/* </View> */}
       </View>
       <View
         style={{
@@ -271,7 +344,7 @@ const Login = ({navigation}) => {
               position: 'relative',
             }}
             onPress={() => {
-              navigation.navigate('Tabs');
+              // navigation.navigate('Tabs');
             }}>
             <Image
               source={images.gg}
@@ -284,6 +357,71 @@ const Login = ({navigation}) => {
               }}
             />
           </TouchableOpacity>
+        </Animated.View>
+
+        <Animated.View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignSelf: 'center',
+            position: 'absolute',
+            bottom: motion3,
+            textAlign: 'center',
+            alignItems: 'center',
+            // borderColor: 'green',
+            width: '100%',
+            height: 30,
+            // backgroundColor: 'red',
+            marginLeft: -35,
+          }}>
+          <View
+            style={{
+              textAlign: 'center',
+              justifyContent: 'center',
+              marginTop: 20,
+              position: 'absolute',
+            }}>
+            <Text
+              style={{
+                textAlign: 'center',
+                justifyContent: 'center',
+                fontWeight: '300',
+                fontSize: 16,
+                fontStyle: 'italic',
+                color: COLORS.black,
+              }}>
+              Đăng Kí Tài Khoản -
+            </Text>
+            <TouchableOpacity
+              style={{
+                borderRadius: 5,
+                backgroundColor: '#FFF',
+                width: 80,
+                height: 40,
+                justifyContent: 'center',
+                textAlign: 'center',
+                borderColor: 'green',
+                borderWidth: 0.1,
+                marginLeft: 139,
+                position: 'absolute',
+              }}
+              onPress={() => {
+                navigation.navigate('FormInfo');
+              }}>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  justifyContent: 'center',
+                  // marginLeft: 18,
+                  fontSize: 14,
+                  fontStyle: 'italic',
+                  fontWeight: 'bold',
+                  color: COLORS.primary,
+                }}>
+                Sign Up
+              </Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       </View>
     </SafeAreaView>

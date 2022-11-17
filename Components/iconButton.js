@@ -12,9 +12,9 @@ const IconButton = ({containerStyle, icon, iconStyle, onPress}) => {
         source={icon}
         resizeMode="contain"
         style={{
-          width: 30,
-          height: 30,
-          tintColor: COLORS.white,
+          width: 25,
+          height: 25,
+          tintColor: COLORS.black,
           ...iconStyle,
         }}
       />

@@ -5,16 +5,19 @@ import {
   Text,
   View,
   ImageBackground,
+  Animated,
+  Keyboard,
 } from 'react-native';
-import {COLORS, FONTS, icons, SIZES} from '../constants';
+import {COLORS, FONTS, icons, images, SIZES} from '../constants';
 import IconLabel from './IconLabel';
-const HorizontalCourseCard = ({containerStyle, course}) => {
+const HorizontalCourseCard = ({containerStyle, course, onPress}) => {
   return (
     <TouchableOpacity
       style={{
         flexDirection: 'row',
         ...containerStyle,
-      }}>
+      }}
+      onPress={onPress}>
       <ImageBackground
         source={course.thumbnail}
         resizeMode="cover"
@@ -25,33 +28,32 @@ const HorizontalCourseCard = ({containerStyle, course}) => {
         }}
         imageStyle={{
           borderRadius: SIZES.radius,
-        }}
-      />
-      <View
-        style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          width: 30,
-          height: 30,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: 5,
-          backgroundColor: COLORS.white,
         }}>
-        <Image
-          source={icons.favourite}
-          resizeMode="contain"
+        <View
           style={{
-            width: 20,
-            height: 20,
-            tintColor: course.is_favourite
-              ? COLORS.secondary
-              : COLORS.additionalColor4,
-            marginRight: 460,
-          }}
-        />
-      </View>
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            width: 30,
+            height: 30,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 5,
+            backgroundColor: COLORS.white,
+          }}>
+          <Image
+            source={icons.favourite}
+            resizeMode="contain"
+            style={{
+              width: 20,
+              height: 20,
+              tintColor: course.is_favourite
+                ? COLORS.secondary
+                : COLORS.additionalColor4,
+            }}
+          />
+        </View>
+      </ImageBackground>
       <View
         style={{
           flex: 1,
@@ -59,11 +61,65 @@ const HorizontalCourseCard = ({containerStyle, course}) => {
         }}>
         <Text
           style={{
-            ...FONTS.h3,
-            fontSize: 18,
+            ...FONTS.h,
+            fontSize: 19,
           }}>
           {course.title}
         </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: SIZES.base,
+          }}>
+          <Text
+            style={{
+              ...FONTS.body4,
+            }}>
+            By {course.instructor}
+          </Text>
+          <IconLabel
+            icon={icons.time}
+            label={course.duration}
+            containerStyle={{
+              marginLeft: SIZES.base,
+            }}
+            iconStyle={{
+              width: 15,
+              height: 15,
+            }}
+            labelStyle={{
+              ...FONTS.body4,
+            }}
+          />
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: SIZES.base,
+          }}>
+          <Text
+            style={{
+              ...FONTS.h2,
+              color: COLORS.primary,
+            }}>
+            ${course.price.toFixed(2)}
+          </Text>
+          <IconLabel
+            icon={icons.star}
+            label={course.ratings}
+            containerStyle={{
+              marginLeft: SIZES.base,
+            }}
+            iconStyle={{
+              width: 15,
+              height: 15,
+              tintColor: COLORS.primary2,
+            }}
+            labelStyle={{marginLeft: 5, color: COLORS.black, ...FONTS.h3}}
+          />
+        </View>
       </View>
     </TouchableOpacity>
   );
