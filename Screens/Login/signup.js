@@ -10,19 +10,26 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Line from '../../Components/Line.js';
 // import {FontAwesome5} from '@expo/vector-icons';
 import {useEffect, useRef, useState} from 'react';
 import {Animated, Easing} from 'react-native';
-import {images, icons, theme} from '../../constants/index.js';
+import {images, icons, theme, COLORS} from '../../constants/index.js';
+import {useDispatch} from 'react-redux';
+import {Logout} from '../../store/actions.js';
 // import LottieView from 'lottie-react-native';
 import {default as FontAwesome5} from 'react-native-vector-icons/FontAwesome5';
 const Signup = ({navigation}) => {
+  const dispatch = useDispatch();
+  const submit = () => {
+    dispatch(Logout());
+  };
   const topMotion = useRef(new Animated.Value(100)).current;
   const spinValue = useRef(new Animated.Value(0)).current;
   const motion = useRef(new Animated.Value(-100)).current;
   const motion1 = useRef(new Animated.Value(-100)).current;
   const motion2 = useRef(new Animated.Value(-100)).current;
-  const [slash, setslash] = useState(true);
+  const [slash, setslash] = useState(false);
   const motion3 = useRef(new Animated.Value(-100)).current;
   const motion4 = useRef(new Animated.Value(-100)).current;
   const motion5 = useRef(new Animated.Value(-100)).current;
@@ -33,19 +40,19 @@ const Signup = ({navigation}) => {
       Animated.parallel([
         Animated.timing(motion, {
           toValue: 20,
-          duration: 2500,
+          duration: 1500,
           useNativeDriver: false,
           easing: Easing.bounce,
         }),
         Animated.timing(motion1, {
           toValue: 20,
-          duration: 1500,
+          duration: 1000,
           useNativeDriver: false,
           easing: Easing.bounce,
         }),
         Animated.timing(motion2, {
           toValue: 20,
-          duration: 2500,
+          duration: 1500,
           useNativeDriver: false,
           easing: Easing.bounce,
         }),
@@ -152,7 +159,7 @@ const Signup = ({navigation}) => {
         <TextInput
           style={styles.inputPass}
           secureTextEntry={slash}
-          // multiline={slash}
+          multiline={true}
           placeholder="Nhập Mật Khẩu"
           autoFocus={false}
           keyboardType={'numeric'}
@@ -221,7 +228,7 @@ const Signup = ({navigation}) => {
 
         <TextInput
           style={styles.inputPass}
-          // multiline={slash}
+          multiline={true}
           secureTextEntry={slash}
           placeholder="Xác Nhận Mật Khẩu"
           autoFocus={false}
@@ -288,29 +295,56 @@ const Signup = ({navigation}) => {
             justifyContent: 'center',
             borderRadius: 28,
             marginTop: 25,
+          }}
+          onPress={() => {
+            submit();
           }}>
           <Text
             style={{
-              fontWeight: 'bold',
+              // fontWeight: 'bold',
               fontSize: 18,
-              color: '#9292',
+              color: COLORS.black,
               textAlign: 'center',
+              fontWeight: '400',
+              fontStyle:'italic',
             }}>
             SIGN UP
           </Text>
         </TouchableOpacity>
       </Animated.View>
       <Animated.View style={{bottom: motion6}}>
-        <Text
-          style={{
-            fontSize: 22,
-            fontWeight: '500',
-            fontStyle: 'italic',
-            color: '#929271',
-            marginTop: 25,
-          }}>
-          OR LOGIN WITH
-        </Text>
+      <View style={{flexDirection: 'row', width: '100%', height: 60}}>
+          <Line
+            lineStyle={{
+              width: 100,
+              position: 'relative',
+              // textAlign: 'center',
+              // alignItems: 'center',
+              marginTop: 50,
+              marginRight: 20,
+            }}
+          />
+          <Text
+            style={{
+              fontSize: 22,
+              fontWeight: '500',
+              fontStyle: 'italic',
+              color: '#929271',
+              marginTop: 35,
+            }}>
+            OR LOGIN WITH
+          </Text>
+          <Line
+            lineStyle={{
+              width: 100,
+              position: 'relative',
+              // textAlign: 'center',
+              // alignItems: 'center',
+              marginTop: 50,
+              marginLeft: 20,
+            }}
+          />
+        </View>
       </Animated.View>
     </SafeAreaView>
   );

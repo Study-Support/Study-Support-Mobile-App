@@ -1,4 +1,13 @@
 import React from 'react';
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedStyle,
+  useAnimatedScrollHandler,
+  useSharedValue,
+  event,
+  withTiming,
+} from 'react-native-reanimated';
 import {
   ImageBackground,
   SafeAreaView,
@@ -18,7 +27,9 @@ import {
   Line,
   CategoryCard,
   HorizontalCourseCard,
+  FilterModal,
 } from '../../Components';
+import {useNavigation} from '@react-navigation/native';
 import {FlatList} from 'react-native-gesture-handler';
 import {FONTS, SIZES, icons, images, dummyData, COLORS} from '../../constants';
 
@@ -37,6 +48,7 @@ const Section = ({containerStyle, title, onPress, children}) => {
           style={{
             flex: 1,
             ...FONTS.h2,
+            color: COLORS.black,
           }}>
           {title}
         </Text>
@@ -45,6 +57,7 @@ const Section = ({containerStyle, title, onPress, children}) => {
             width: 80,
             borderRadius: 30,
             backgroundColor: COLORS.primary,
+            // marginLeft: 20
           }}
           label="See All"
           onPress={onPress}
@@ -56,19 +69,77 @@ const Section = ({containerStyle, title, onPress, children}) => {
 };
 
 const Home = () => {
+  const filterSharevalue1 = useSharedValue(SIZES.height);
+  const filterSharevalue2 = useSharedValue(SIZES.height);
+  const navigation = useNavigation();
+  const ScrollViewRef = React.useRef();
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler(event => {
+    scrollY.value = event.contentOffset.y;
+  });
+  const inputRange = [0, 100];
+  const headerAnimated = useAnimatedStyle(() => {
+    return {
+      height: interpolate(
+        scrollY.value,
+        inputRange,
+        [55, 0],
+        Extrapolate.CLAMP,
+      ),
+      opacity: interpolate(
+        scrollY.value,
+        inputRange,
+        [1, 0],
+        Extrapolate.CLAMP,
+      ),
+    };
+  });
   function renderHeader() {
+    // const inputRange = [0, 55];
+    // const headerAnimated = useAnimatedStyle(() => {
+    //   return {
+    //     height: interpolate(
+    //       scrollY.valueOf,
+    //       inputRange,
+    //       [55, 0],
+    //       Extrapolate.CLAMP,
+    //     ),
+    //   };
+    // });
     return (
-      <View
-        style={{
-          flexDirection: 'row',
-          marginTop: 10,
-          marginBottom: 5,
-          paddingHorizontal: SIZES.padding,
-          alignItems: 'center',
-        }}>
+      <Animated.View
+        // style={
+        //   ({
+        //     flexDirection: 'row',
+        //     marginTop: 2,
+        //     marginBottom: 2,
+        //     paddingHorizontal: SIZES.padding,
+        //     alignItems: 'center',
+        //     backgroundColor: 'red',
+        //     width: '100%',
+        //     height: 55,
+        //   },
+        //   headerAnimated)
+        // }
+        style={[
+          {
+            flexDirection: 'row',
+            marginTop: 2,
+            marginBottom: 2,
+            paddingHorizontal: SIZES.padding,
+            alignItems: 'center',
+            // backgroundColor: 't',
+            width: '100%',
+            height: 55,
+          },
+          headerAnimated,
+        ]}>
         <View style={{flex: 1}}>
-          <Text style={{...FONTS.h2}}>Hello, ByProGammer!</Text>
-          <Text style={{color: COLORS.gray50, ...FONTS.body3}}>
+          <Text style={{...FONTS.h3, color: COLORS.black}}>
+            Hello, NhatQuang!
+          </Text>
+          <Text
+            style={{color: COLORS.black, ...FONTS.body3, fontStyle: 'italic'}}>
             ThursDay, 19th Sept 2022
           </Text>
         </View>
@@ -78,8 +149,12 @@ const Home = () => {
             tintColor: COLORS.black,
             padding: 10,
           }}
+          onPress={() => {
+            filterSharevalue1.value = withTiming(0, {duration: 100});
+            filterSharevalue2.value = withTiming(0, {duration: 500});
+          }}
         />
-      </View>
+      </Animated.View>
     );
   }
   function renderStartLearning() {
@@ -91,6 +166,7 @@ const Home = () => {
           marginTop: SIZES.padding,
           marginHorizontal: SIZES.padding,
           padding: 15,
+          marginTop: -2,
         }}
         imageStyle={{
           borderRadius: SIZES.radius,
@@ -123,12 +199,12 @@ const Home = () => {
           source={images.start_learning}
           style={{
             width: '100%',
-            height: 110,
+            height: 100,
             marginTop: SIZES.padding,
           }}
         />
         <TextButton
-          label="Start Learning"
+          label="Find Your Subject"
           contentContainerStyle={{
             height: 40,
             paddingHorizontal: SIZES.padding,
@@ -144,28 +220,34 @@ const Home = () => {
   }
   function renderCourse() {
     return (
-      <FlatList
-        horizontal
-        data={dummyData.courses_list_1}
-        listKey="Course"
-        keyExtractor={item => `Course-${item.id}`}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          marginTop: SIZES.padding,
-        }}
-        renderItem={({item, index}) => (
-          <VerticalCourseCard
-            containerStyle={{
-              marginLeft: index == 0 ? SIZES.padding : SIZES.radius,
-              marginRight:
-                index == dummyData.courses_list_1.length - 1
-                  ? SIZES.padding
-                  : 0,
-            }}
-            course={item}
-          />
-        )}
-      />
+      <Section
+        title="Recommend Subject"
+        containerStyle={{
+          marginTop: 10,
+        }}>
+        <FlatList
+          horizontal
+          data={dummyData.courses_list_1}
+          listKey="Course"
+          keyExtractor={item => `Course-${item.id}`}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            marginTop: SIZES.padding,
+          }}
+          renderItem={({item, index}) => (
+            <VerticalCourseCard
+              containerStyle={{
+                marginLeft: index == 0 ? SIZES.padding : SIZES.radius,
+                marginRight:
+                  index == dummyData.courses_list_1.length - 1
+                    ? SIZES.padding
+                    : 0,
+              }}
+              course={item}
+            />
+          )}
+        />
+      </Section>
     );
   }
   function renderCategories() {
@@ -182,12 +264,19 @@ const Home = () => {
           }}
           renderItem={({item, index}) => (
             <CategoryCard
+              sharedElementPrefix="Home"
               category={item}
               containerStyle={{
                 marginLeft: index == 0 ? SIZES.padding : SIZES.base,
                 marginRight:
                   index == dummyData.categories.length - 1 ? SIZES.padding : 0,
               }}
+              onPress={() =>
+                navigation.navigate('CourseListing', {
+                  category: item,
+                  sharedElementPrefix: 'Home',
+                })
+              }
             />
           )}
         />
@@ -197,9 +286,12 @@ const Home = () => {
   function renderPopularCourse() {
     return (
       <Section
-        title="Popolar Course"
+        title="Top Mentor"
         containerStyle={{
+          flex: 1,
+          width: '120%',
           marginTop: 20,
+          // backgroundColor: 'red',
         }}>
         <FlatList
           data={dummyData.courses_list_2}
@@ -219,11 +311,17 @@ const Home = () => {
               }}
             />
           )}
+          ItemSeparatorComponent={() => (
+            <Line
+              lineStyle={{
+                backgroundColor: COLORS.gray20,
+              }}
+            />
+          )}
         />
       </Section>
     );
   }
-  // <ScrollView horizontal={true} style={{flex:1,width: '100%'}}></ScrollView>
   return (
     <View
       style={{
@@ -231,10 +329,15 @@ const Home = () => {
         backgroundColor: COLORS.white,
       }}>
       {renderHeader()}
-      <ScrollView
+      <Animated.ScrollView
         style={{
           paddingBottom: 150,
         }}
+        ref={ScrollViewRef}
+        scrollEventThrottle={16}
+        keyboardDismissMode="on-drag"
+        onScroll={onScroll}
+        // onScrollEndDrag
         showsVerticalScrollIndicator={false}>
         {renderStartLearning()}
         {renderCourse()}
@@ -244,8 +347,16 @@ const Home = () => {
           }}
         />
         {renderCategories()}
-        {renderPopularCourse()}
-      </ScrollView>
+        <ScrollView horizontal={true} style={{flex: 1, width: '100%'}}>
+          {renderPopularCourse()}
+        </ScrollView>
+      </Animated.ScrollView>
+      <FilterModal
+        filterSharevalue1={filterSharevalue1}
+        filterSharevalue2={filterSharevalue2}
+        height={SIZES.height}
+        bottom={0}
+      />
     </View>
   );
 };
