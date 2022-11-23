@@ -1,63 +1,30 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Provider, useDispatch, useSelector} from 'react-redux';
+import {useEffect, useRef, useState} from 'react';
 // import axios from 'axios';
 const BASE_URL =
-  'https://3453-2402-9d80-433-8a05-5911-2f41-1ddb-a304.ap.ngrok.io/api/v1';
-// const BASE_URL = 'http://restapi.adequateshop.com/api';
+  'https://e149-117-2-255-218.ap.ngrok.io/api/v1';
+// const BASE_URL1 = 'http://127.0.0.1:8000/api/v1';
 export const Init = () => {
   return async dispatch => {
     let token = await AsyncStorage.getItem('token');
+    let id = await AsyncStorage.getItem('id');
     if (token !== null) {
-      console.log('token fetched');
+      // console.log(token);
       dispatch({
         type: 'LOGIN',
         payload: token,
+        id: id,
       });
+      await dispatch(GetFaculitys(token));
+      await dispatch(GetInfoUser(token));
     }
   };
 };
-// export const Register = (
-//   email,
-//   password,
-//   confpass,
-//   full_name,
-//   phone_number,
-//   birthday,
-//   gender,
-//   fal,
-//   address,
-// ) => {
-//   return async dispatch => {
-//     let token = null;
-//     if (username === 'nhatquang' && password === '1234') {
-//       token = username + password;
-//       // here we can use login api to get token and then store it
-//       await AsyncStorage.setItem('token', token);
-//       console.log('token stored');
-//     }
-//     dispatch({
-//       type: 'LOGIN',
-//       payload: token,
-//     });
-//   };
-// };
-// export const Login = (username, password) => {
-//   return async dispatch => {
-//     let token = null;
-//     if (username === 'nhatquang' && password === '1234') {
-//       token = username + password;
-//       // here we can use login api to get token and then store it
-//       await AsyncStorage.setItem('token', token);
-//       console.log('token stored');
-//     }
-//     dispatch({
-//       type: 'LOGIN',
-//       payload: token,
-//     });
-//   };
-// };
+
 export const Login = (username, password) => {
+  let token = null;
   return async dispatch => {
-    let token = null;
     await fetch(`${BASE_URL}/login`, {
       method: 'POST',
       headers: {
@@ -69,92 +36,252 @@ export const Login = (username, password) => {
         password: password,
       }),
     })
-      .then(response => {
-        // console.log(email + password);
-        if (response.status === 200) {
-          console.log(response.data);
-          // response.json();
-          token = response.status.toString();
-          AsyncStorage.setItem('token', token);
-          // console.log(response.data.toString());
-          dispatch({
-            type: 'LOGIN',
-            payload: token,
-          });
-        }
-        // console.log(JSON.stringify(response.status));
-      })
-      .then(data => {
+      .then(response => response.json())
+      .then(async data => {
         // console.log(data);
+        var result = [];
+        for (var i in data) {
+          result.push([i, data[i]]);
+        }
+        // console.log(result);
+        var rs = result[1];
+        var rs1 = Object.values(rs[1]);
+        // console.log(rs1);
+        for (var i in rs1) {
+          if (i != 0) {
+            if (i == 1) {
+              var id = `${Object.values(rs1[i])[0]}`;
+              // console.log(id);
+              await AsyncStorage.setItem('id', `${id}`);
+            } else {
+              token = Object.values(rs1[i])[1];
+              // console.log(token);
+              // console.log(token.type);
+              await AsyncStorage.setItem('token', `${token}`);
+              // GetAllClients(token);
+              dispatch({
+                type: 'LOGIN',
+                payload: token,
+                id: id,
+              });
+              await dispatch(GetFaculitys(token));
+              await dispatch(GetInfoUser(token));
+            }
+          }
+        }
       })
       .catch(err => {
         console.log(err + 'NO');
       });
-    // fetch(`${BASE_URL}/user`)
-    //   .then(response => {
-    //     console.log(response.status.toString());
-    //   })
-    //   .then(data => console.log(data.JSON()))
-    //   .catch(error => console.log(error));
   };
 };
-//     // let res = await axios.post(BASE_URL, {
-//     //   email: 'admin@test.com',
-//     //   password: 'Admin123',
-//     // });
-
-//     // console.log(res.data);
-//     // fetch('https://jsonplaceholder.typicode.com/posts', {
-//     //   // Adding method type
-//     //   method: 'POST',
-
-//     //   // Adding body or contents to send
-//     //   body: JSON.stringify({
-//     //     title: 'Quang',
-//     //     body: 'hahaha',
-//     //     userId: 1,
-//     //   }),
-
-//     //   // Adding headers to the request
-//     //   headers: {
-//     //     'Content-type': 'application/json; charset=UTF-8',
-//     //   },
-//     // })
-//     //   .then(response => response.json())
-
-//     //   // Displaying results to console
-//     //   .then(json => console.log(json));
-//     // await fetch(`${BASE_URL}`)
-//     //   .then(response => console.log(response.json()))
-//     //   .then(data => console.log(data))
-//     //   .catch(err => {
-//     //     console.log(err + 'NO');
-//     //   });
-//     // // await AsyncStorage.setItem('token', token);
-//     // console.log('token stored');
-//     // console.log(res);
-//     // await fetch
-//     //   .post(`${BASE_URL}/Tourist`, {
-//     //     // username,
-//     //     // password,
-//     //   })
-//     //   .then(res => {
-//     //     let userinfo = res.data;
-//     //     console.log(userinfo);
-//     //     token = userinfo;
-//     //     AsyncStorage.setItem('token', token);
-//     //     console.log('token stored');
-//     //   });
-//     // console.log(token + 'y');
-//     // dispatch({
-//     //   type: 'LOGIN',
-//     //   payload: token,
-//     // });
-//   };
-// };
-
+export const Register = account => {
+  // let token = null;
+  return async dispatch => {
+    await fetch(`${BASE_URL}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        email: account.email,
+        password: account.password,
+        confirm_password: account.confirm_password,
+        full_name: account.full_name,
+        phone_number: account.phone_number,
+        birthday: account.birthday,
+        gender: account.gender,
+        faculty_id: account.faculty_id,
+        address: account.address,
+      }),
+    })
+      .then(response => {
+        if (response.status === 200) {
+          console.log('Đăng kí Thành Công !');
+          dispatch(Login(account.email, account.password));
+          return response.json();
+        } else {
+          console.log(response);
+        }
+      })
+      .then(response => {
+        console.log(response.data);
+      })
+      .catch(err => {
+        console.log(err + 'NO');
+      });
+  };
+};
+export const GetInfoUser = token => {
+  // console.log(`Bearer ${token}`);
+  const myHeaders = new Headers({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  });
+  return async dispatch => {
+    {
+      await fetch(`${BASE_URL}/user`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(response => {
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            console.log(response.status.toString());
+            return response.json();
+          }
+        })
+        .then(response => {
+          // console.log(response.data);
+          // setUsersData(response.data);
+          // console.log(usersData);
+          dispatch({
+            type: 'GetUserDetail',
+            user: response.data,
+          });
+          return response.data;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  };
+};
+export const UpdateUser = async user => {
+  // console.log(user);
+  // console.log(user);
+  // const dispatch = useDispatch();
+  let token = await AsyncStorage.getItem('token');
+  // console.log(user.gender === 0 ? false : true);
+  await fetch(`${BASE_URL}/user/edit`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      phone_number: user.phone_number,
+      address: user.address,
+      birthday: user.birthday,
+      gender: true,
+      full_name: user.full_name,
+      avatar_url: null,
+      faculty_id: user.faculty_id,
+    }),
+  })
+    .then(async response => {
+      if (response.status === 200) {
+        console.log('Update Thành Công!');
+        await GetFaculitys(token);
+        await GetInfoUser(token);
+        return response.json();
+      } else {
+        console.log(response.status.toString());
+        return response.json();
+      }
+    })
+    .then(data => {
+      console.log(data.meta);
+    })
+    .catch(err => {
+      console.log(err + 'NO');
+    });
+};
+export const UpdatePassWord = async user => {
+  let token = await AsyncStorage.getItem('token');
+  await fetch(`${BASE_URL}/user/edit`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      current_password: user.current_password,
+      password: user.password,
+      confirm_password: user.confirm_password,
+    }),
+  })
+    .then(response => {
+      if (response.status === 200) {
+        console.log('Update Pass Thành Công!');
+        return response.json();
+      } else {
+        console.log(response.status.toString());
+        return response.json();
+      }
+    })
+    .then(data => {
+      console.log(data.meta);
+    })
+    .catch(err => {
+      console.log(err + 'NO');
+    });
+};
+export const GetFaculitys = token => {
+  const myHeaders = new Headers({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  });
+  return async dispatch => {
+    {
+      await fetch(`${BASE_URL}/faculties`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(response => {
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            console.log(response.status.toString());
+            return response.json();
+          }
+        })
+        .then(response => {
+          // console.log(response.data.data);
+          // setUsersData(response.data);
+          // console.log(usersData);
+          dispatch({
+            type: 'GetFaculties',
+            faculties: response.data.data,
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  };
+};
 export const Logout = () => {
   return async dispatch => {
+    await fetch(`${BASE_URL}/logout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({}),
+    })
+      .then(response => {
+        console.log(response.status);
+        if (response.status === 200) {
+          console.log('Logout Thành Công!');
+        }
+      })
+      .catch(err => {
+        console.log(err + 'NO');
+      });
     await AsyncStorage.clear();
     dispatch({
       type: 'LOGOUT',
