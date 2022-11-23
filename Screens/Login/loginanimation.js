@@ -17,7 +17,7 @@ import {Animated, Easing} from 'react-native';
 import {images, icons, theme, COLORS} from '../../constants/index.js';
 // import LottieView from 'lottie-react-native';
 import {useDispatch} from 'react-redux';
-import {Login} from '../../store/actions.js';
+import {Login,Login1} from '../../store/actions.js';
 import {err} from 'react-native-svg/lib/typescript/xml.js';
 import {axios} from 'axios';
 const Loginani = ({navigation}) => {
