@@ -42,11 +42,21 @@ import {
 } from '../../../constants';
 
 const Chapters = () => {
-  // function renderChapters(){
-  //     return (
-
-  //     );
-  // }
+  function renderChapters() {
+    return (
+      <View
+        style={{
+          position: 'relative',
+          height: '100%',
+          width: '100%',
+          marginTop: SIZES.padding,
+          paddingHorizontal: SIZES.padding,
+          backgroundColor: 'blue',
+        }}>
+        <Text>aaa</Text>
+      </View>
+    );
+  }
   function renderHeader() {
     return (
       <View
@@ -173,7 +183,7 @@ const Chapters = () => {
   return (
     <ScrollView>
       {renderHeader()}
-      {/* {renderChapters()} */}
+      {renderChapters()}
     </ScrollView>
   );
 };
