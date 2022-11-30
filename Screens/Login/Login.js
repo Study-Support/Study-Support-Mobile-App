@@ -18,8 +18,8 @@ import Loginani from './loginanimation';
 import Signup from './signup';
 import FormInfo from './FormInfo.js';
 import TabLayout from 'react-native-simple-tablayout';
+import Creat from '../Joins/JoinWithMentor.js';
 const {width} = Dimensions.get('window');
-
 const Login = ({navigation, params}) => {
   const motion = useRef(new Animated.Value(-200)).current;
   const motion1 = useRef(new Animated.Value(-200)).current;
@@ -344,7 +344,7 @@ const Login = ({navigation, params}) => {
               position: 'relative',
             }}
             onPress={() => {
-              // navigation.navigate('Tabs');
+              navigation.navigate('Creat');
             }}>
             <Image
               source={images.gg}

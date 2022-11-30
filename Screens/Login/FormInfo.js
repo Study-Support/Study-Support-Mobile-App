@@ -18,30 +18,57 @@ import {useEffect, useRef, useState} from 'react';
 import {Animated, Easing} from 'react-native';
 import {images, icons, theme, COLORS, SIZES} from '../../constants/index.js';
 import {useDispatch} from 'react-redux';
-import {Logout} from '../../store/actions.js';
+import {Login, Register} from '../../store/actions.js';
 // import LottieView from 'lottie-react-native';
 import {MotiView, ScrollView, useAnimationState} from 'moti';
 import {Shadow} from 'react-native-shadow-2';
 import SelectBox from 'react-native-multi-selectbox';
 import {ColorSpace, event} from 'react-native-reanimated';
-
-const data = [
-  {key: '1', value: 'Mobiles'},
-  {key: '2', value: 'Appliances'},
-  {key: '3', value: 'Cameras'},
-  {key: '4', value: 'Computers'},
-  {key: '5', value: 'Vegetables'},
-  {key: '6', value: 'Diary Products'},
-  {key: '7', value: 'Drinks'},
-];
+const BASE_URL =
+  'https://1c03-2402-800-6294-34c3-5d98-e8af-7559-9886.ap.ngrok.io/api/v1';
+let khoa = [];
 const FormInfo = ({navigation}) => {
+  let account = {};
+  useEffect(() => {
+    fetch(`${BASE_URL}/faculties`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        // Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(response => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          console.log(response.status.toString());
+          return response.json();
+        }
+      })
+      .then(response => {
+        response.data.data.forEach(key => {
+          khoa.push({key: `${key.id}`, value: `${key.name}`});
+        });
+        console.log(khoa);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, [fal]);
+  const submit = () => {
+    dispatch(Register(account));
+  };
+  const [email, setEmail] = useState('');
+  const [pass, setPass] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [selected, setSelected] = useState('');
   const [slash, setslash] = useState(true);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [birthday, setBirthday] = useState('');
   const [date, setDate] = useState(new Date());
-  const [gender, setGender] = useState('');
+  const [gender, setGender] = useState(true);
   const [address, setAddress] = useState('');
   const [fal, setFal] = useState('');
   const [avartar, setAvartar] = useState('');
@@ -67,9 +94,6 @@ const FormInfo = ({navigation}) => {
     setShow(true);
     setMode(currentMode);
   };
-  const submit = () => {
-    navigation.navigate('Login');
-  };
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
@@ -80,7 +104,7 @@ const FormInfo = ({navigation}) => {
             style={{
               // flexDirection: 'row',
               width: '100%',
-              height: 280,
+              height: 380,
               backgroundColor: 'transparent',
               paddingHorizontal: SIZES.padding,
               paddingVertical: SIZES.radius,
@@ -114,7 +138,7 @@ const FormInfo = ({navigation}) => {
                     secureTextEntry={false}
                     height={'103%'}
                     multiline={true}
-                    value={name}
+                    value={email}
                     maxLength={25}
                     placeholder="email"
                     autoFocus={false}
@@ -122,7 +146,7 @@ const FormInfo = ({navigation}) => {
                     keyboardType={'name-phone-pad'}
                     placeholderTextColor={COLORS.gray}
                     backgroundColor={'#9292'}
-                    onChangeText={text => setName(text)}
+                    onChangeText={text => setEmail(text)}
                   />
                   <Image
                     source={icons.email}
@@ -152,7 +176,7 @@ const FormInfo = ({navigation}) => {
                     secureTextEntry={false}
                     height={'103%'}
                     multiline={true}
-                    value={name}
+                    value={pass}
                     maxLength={25}
                     placeholder="password"
                     autoFocus={false}
@@ -160,7 +184,7 @@ const FormInfo = ({navigation}) => {
                     keyboardType={'name-phone-pad'}
                     placeholderTextColor="#000"
                     backgroundColor={'#9292'}
-                    onChangeText={text => setName(text)}
+                    onChangeText={text => setPass(text)}
                   />
                   <Image
                     source={icons.password}
@@ -190,7 +214,7 @@ const FormInfo = ({navigation}) => {
                     secureTextEntry={false}
                     height={'103%'}
                     multiline={true}
-                    value={name}
+                    value={confirm}
                     maxLength={25}
                     placeholder="confirm pass"
                     autoFocus={false}
@@ -198,7 +222,7 @@ const FormInfo = ({navigation}) => {
                     keyboardType={'name-phone-pad'}
                     placeholderTextColor="#000"
                     backgroundColor={'#9292'}
-                    onChangeText={text => setName(text)}
+                    onChangeText={text => setConfirm(text)}
                   />
                   <Image
                     source={icons.password}
@@ -216,12 +240,12 @@ const FormInfo = ({navigation}) => {
                 </View>
                 <View
                   style={{
-                    // position:'absolute',
+                    position:'relative',
                     // backgroundColor: 'red',
                     borderRadius: 20,
                     // alignItems: 'center',
                     justifyContent: 'center',
-                    height: 50,
+                    // height: 90,
                     width: '100%',
                     paddingHorizontal: 8,
                     marginTop: 20,
@@ -229,13 +253,16 @@ const FormInfo = ({navigation}) => {
                   }}>
                   <SelectList
                     setSelected={val =>
-                      data.forEach(key => {
+                      khoa.forEach(key => {
                         if (key.value === val) {
-                          console.log(key.key);
+                          // console.log(key.key);
+                          setFal(key.key);
+                          account.faculty_id = key.key;
+                          // console.log(fal);
                         }
                       })
                     }
-                    data={data}
+                    data={khoa}
                     save="value"
                   />
                   {/* <Image
@@ -318,6 +345,7 @@ const FormInfo = ({navigation}) => {
             {/* </View> */}
           </View>
           <ScrollView
+          scrollEnabled ={true}
             horizontal={false}
             contentContainerStyle={{
               justifyContent: 'center',
@@ -558,6 +586,16 @@ const FormInfo = ({navigation}) => {
                       marginTop: 18,
                     }}
                     onPress={() => {
+                      account.email = email;
+                      account.password = pass;
+                      account.confirm_password = confirm;
+                      account.full_name = name;
+                      account.phone_number = phone;
+                      account.birthday = birthday;
+                      account.gender = true;
+                      account.faculty_id = fal;
+                      account.address = address;
+                      console.log(account);
                       submit();
                     }}>
                     <Text
