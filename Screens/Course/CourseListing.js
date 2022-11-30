@@ -269,8 +269,10 @@ const CourseListing = ({navigation, route}) => {
               style={{
                 flex: 1,
                 ...FONTS.body3,
+                color:COLORS.black,
+                fontStyle:'italic',
               }}>
-              5,761 Results
+              28 Results
             </Text>
             <IconButton
               icon={icons.filter}

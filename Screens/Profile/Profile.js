@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {store} from '../../store';
+import {ActivityIndicator} from 'react-native-paper';
 import {
   Extrapolate,
   interpolate,
@@ -23,12 +25,12 @@ import {
   IconButton,
   TextButton,
   Profilevalue,
-  FilterModal,
+  FilterUpdate,
+  FilterUpdatePass,
 } from '../../Components';
 // import {FontAwesome5} from '@expo/vector-icons';
 import {useEffect, useRef, useState} from 'react';
 import {Easing, Animated} from 'react-native';
-import {useDispatch} from 'react-redux';
 import {Logout} from '../../store/actions.js';
 import {
   images,
@@ -40,11 +42,54 @@ import {
 } from '../../constants/index.js';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
+import {useDispatch, useSelector, Provider} from 'react-redux';
+import {
+  GetAllClients,
+  GetInfoUser,
+  GetFaculitys,
+  Login,
+} from '../../store/actions';
 const Profile = () => {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.Reducers.userDetail);
+  // console.log(user);
+  const khoa = useSelector(state => state.Reducers.getFaculties);
+  const [fal, setFal] = useState('');
+  const [gender, setGender] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [choose, setChoose] = useState(true);
+  const init = async () => {
+    if (khoa != null && user != null) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  };
+  useEffect(() => {
+    init();
+    if (khoa != null && user != null) {
+      khoa.forEach(khoa => {
+        if (khoa.id === user.faculty_id) {
+          setFal(khoa.name);
+        }
+      });
+      if (user.gender === 0) {
+        setGender('Nữ');
+      } else {
+        setGender('Nam');
+      }
+    }
+  }, []);
   const filterSharevalue1 = useSharedValue(SIZES.height);
   const filterSharevalue2 = useSharedValue(SIZES.height);
   const navigation = useNavigation();
-  const dispatch = useDispatch();
+  if (loading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center'}}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
   function renderHeader() {
     return (
       <View
@@ -72,7 +117,9 @@ const Profile = () => {
       </View>
     );
   }
-  function renderProfileCard() {
+  function RenderProfileCard() {
+    // const user = useSelector(state => state.Reducers.userDetail);
+    // console.log(user);
     return (
       <View
         style={{
@@ -138,7 +185,7 @@ const Profile = () => {
               color: COLORS.white,
               ...FONTS.h2,
             }}>
-            Hi NhatQuang!
+            Hi {user.full_name}!
           </Text>
           <Text
             style={{
@@ -176,13 +223,13 @@ const Profile = () => {
       </View>
     );
   }
-  function renderProfileSection1() {
+  function RenderProfileSection1() {
     return (
       <View style={styles.profileSectionContainer}>
         <Profilevalue
           icon={icons.profile}
           label="Name"
-          value="Tran Nhat Quang"
+          value={user.full_name}
           color={COLORS.primary}
         />
         <Line />
@@ -190,9 +237,10 @@ const Profile = () => {
         <Profilevalue
           icon={icons.email}
           label="Email"
-          value="nhatquangtran135@gmail.com"
+          value={user.email}
           color={COLORS.primary}
           onPress={() => {
+            setChoose(false);
             filterSharevalue1.value = withTiming(0, {duration: 100});
             filterSharevalue2.value = withTiming(0, {duration: 500});
           }}
@@ -204,13 +252,18 @@ const Profile = () => {
           label="Password"
           value="Update"
           color={COLORS.primary}
+          onPress={() => {
+            setChoose(true);
+            filterSharevalue1.value = withTiming(0, {duration: 100});
+            filterSharevalue2.value = withTiming(0, {duration: 500});
+          }}
         />
         <Line />
 
         <Profilevalue
           icon={icons.call}
           label="Contact Number"
-          value="0935267739"
+          value={user.phone_number}
           color={COLORS.primary}
         />
 
@@ -218,8 +271,8 @@ const Profile = () => {
 
         <Profilevalue
           icon={icons.password}
-          label="Password"
-          value="Update"
+          label="Gender"
+          value={gender}
           color={COLORS.primary}
         />
 
@@ -228,16 +281,12 @@ const Profile = () => {
         <Profilevalue
           icon={icons.birthday}
           label="Ngày Sinh"
-          value="02/01/2001"
+          value={user.birthday}
         />
 
         <Line />
-
-        <Profilevalue
-          icon={icons.khoa}
-          label="Khoa"
-          value="Công Nghệ Thông Tin"
-        />
+        {/* {console.log(khoa.id)} */}
+        <Profilevalue icon={icons.khoa} label="Khoa" value={fal} />
       </View>
     );
   }
@@ -257,7 +306,6 @@ const Profile = () => {
       </View>
     );
   }
-
   return (
     <View
       style={{
@@ -270,16 +318,27 @@ const Profile = () => {
           paddingHorizontal: SIZES.padding,
           paddingBottom: 80,
         }}>
-        {renderProfileCard()}
-        {renderProfileSection1()}
+        {RenderProfileCard()}
+        {RenderProfileSection1()}
         {renderProfileSection2()}
       </ScrollView>
-      <FilterModal
-        filterSharevalue1={filterSharevalue1}
-        filterSharevalue2={filterSharevalue2}
-        height={400}
-        bottom={200}
-      />
+      {!choose && (
+        <FilterUpdate
+          filterSharevalue1={filterSharevalue1}
+          filterSharevalue2={filterSharevalue2}
+          height={650}
+          bottom={0}
+          user={user}
+        />
+      )}
+      {choose && (
+        <FilterUpdatePass
+          filterSharevalue1={filterSharevalue1}
+          filterSharevalue2={filterSharevalue2}
+          height={450}
+          bottom={0}
+        />
+      )}
     </View>
   );
 };
