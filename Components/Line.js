@@ -8,7 +8,7 @@ const Line = ({lineStyle}) => {
       style={{
         height: 2,
         width: '100%',
-        backgroundColor: COLORS.gray20,
+        backgroundColor: COLORS.gray30,
         ...lineStyle,
       }}
     />

@@ -8,6 +8,7 @@ const VerticalCourseCard = ({containerStyle, course}) => {
       style={{
         width: 270,
         ...containerStyle,
+        paddingBottom: 9,
       }}>
       <Image
         source={course.thumbnail}
@@ -28,18 +29,35 @@ const VerticalCourseCard = ({containerStyle, course}) => {
             width: 45,
             height: 45,
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
             borderRadius: 25,
             backgroundColor: COLORS.primary,
           }}>
           <Image
-            source={icons.play}
+            source={icons.mentor}
             resizeMode="contain"
             style={{
-              width: 20,
-              height: 20,
+              width: 40,
+              height: 40,
             }}
           />
+          <View style={{ flexDirection: 'row'}}>
+            <IconLabel
+              icon={icons.star}
+              label={course.ratings}
+              containerStyle={{
+                marginLeft: SIZES.base,
+                marginTop: 2,
+              }}
+              iconStyle={{
+                width: 15,
+                height: 15,
+                tintColor: COLORS.primary2,
+              }}
+              labelStyle={{marginLeft: 5, color: COLORS.black, ...FONTS.h3}}
+            />
+            <Text style={{marginTop: 3}}>{course.rating}</Text>
+          </View>
         </View>
         <View
           style={{
@@ -51,6 +69,7 @@ const VerticalCourseCard = ({containerStyle, course}) => {
               flex: 1,
               ...FONTS.h3,
               fontSize: 18,
+              color: COLORS.black,
             }}>
             {course.title}
           </Text>
@@ -61,6 +80,41 @@ const VerticalCourseCard = ({containerStyle, course}) => {
               marginTop: SIZES.base,
             }}
           />
+        </View>
+
+        <View
+          style={{
+            flexShrink: 1,
+            paddingHorizontal: SIZES.radius,
+          }}>
+          <Text
+            style={{
+              flex: 1,
+              ...FONTS.h3,
+              fontSize: 14,
+              color: COLORS.black,
+            }}>
+            Thành Viên: {course.thanhvien}
+          </Text>
+          <Text
+            style={{
+              flex: 1,
+              ...FONTS.h3,
+              fontSize: 14,
+              color: COLORS.black,
+            }}>
+            Mentor: {course.mentor}
+          </Text>
+          {/* <Image
+            source={icons.join}
+            resizeMode="contain"
+            // label={course.duration}
+            style={{
+              marginTop: SIZES.base,
+              width: 30,
+              height: 30,
+            }}
+          /> */}
         </View>
       </View>
     </TouchableOpacity>
