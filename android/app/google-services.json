@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "359036078553",
+    "firebase_url": "https://pbl6-study-support-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "pbl6-study-support",
+    "storage_bucket": "pbl6-study-support.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:359036078553:android:e4af0e4f4fdfbed02e31c8",
+        "android_client_info": {
+          "package_name": "com.pbl_6_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "359036078553-hp90npcgii36qrom7m46o78o5bokjdl2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZOwJt5UVaKz5MNUUh-mZHc3RGpTT5yTg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "359036078553-hp90npcgii36qrom7m46o78o5bokjdl2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

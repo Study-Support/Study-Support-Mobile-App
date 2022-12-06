@@ -7,111 +7,141 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-import {createStackNavigator} from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
+import Creatgroup from './Screens/Joins/Creatgroup';
 import Login from './Screens/Login/Login';
 import Signup from './Screens/Login/signup';
 import Home from './Screens/Dashboard/Home';
 import 'react-native-gesture-handler';
 import Tabs from './Screens/Dashboard/Tab';
-const Stack = createStackNavigator();
+import Chat from './Screens/Joins/Join';
+// const Stack = createStackNavigator();
 
-export default function App() {
+import React, {useEffect, useState} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from '@react-navigation/stack';
+import {StatusBar, Easing} from 'react-native';
+import {createSharedElementStackNavigator} from 'react-navigation-shared-element';
+import {Provider, useDispatch, useSelector} from 'react-redux';
+import {store} from './store';
+import {ActivityIndicator} from 'react-native-paper';
+import {images, icons, theme, COLORS} from './constants';
+import {Init} from './store/actions';
+import FormInfo from './Screens/Login/FormInfo';
+import Profile from './Screens/Profile/Profile';
+import {useNavigation} from '@react-navigation/native';
+import CourseListing from './Screens/Course/CourseListing';
+import GroupDetail from './Screens/Course/GroupDetail';
+import Joingroup from './Screens/Joins/Joingroup';
+const Stack = createSharedElementStackNavigator();
+
+const options = {
+  gestureEnabled: false,
+  transitionSpec: {
+    open: {
+      animation: 'timing',
+      config: {duration: 800, easing: Easing.inOut(Easing.ease)},
+    },
+    close: {
+      animation: 'timing',
+      config: {duration: 800, easing: Easing.inOut(Easing.ease)},
+    },
+  },
+  cardStyleInterpolator: ({current: {progress}}) => {
+    return {
+      cardStyle: {
+        opacity: progress,
+      },
+    };
+  },
+};
+
+const MyStack = () => {
+  return (
+    <Stack.Navigator
+      headerMode="none"
+      screenOptions={{
+        useNativeDrive: true,
+        headerShown: false,
+      }}
+      initialRouteName={'Tabs'}>
+      <Stack.Screen name="Tabs" component={Tabs} />
+      <Stack.Screen
+        name="CourseListing"
+        component={CourseListing}
+        options={() => options}
+      />
+      <Stack.Screen
+        name="Joingroup"
+        component={Joingroup}
+        // options={() => options}
+      />
+      <Stack.Screen
+        name="GroupDetail"
+        component={GroupDetail}
+        // options={() => options}
+      />
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen name="Creatgroup" component={Creatgroup} />
+    </Stack.Navigator>
+  );
+};
+
+const AuthStack = () => {
+  return (
+    <Stack.Navigator
+      headerMode="none"
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="FormInfo" component={FormInfo} />
+    </Stack.Navigator>
+  );
+};
+
+const RootNavigation = () => {
+  const token = useSelector(state => state.Reducers.authToken);
+  // console.log(token);
+  const id = useSelector(state => state.Reducers.idUser);
+  // console.log(id);
+  const [loading, setLoading] = useState(true);
+
+  const dispatch = useDispatch();
+  const init = async () => {
+    dispatch(Init());
+  };
+
+  useEffect(() => {
+    init();
+    setLoading(false);
+  },[]);
+
+  if (loading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center'}}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}
-        initialRouteName={'Login'}>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Tabs" component={Tabs} />
-      </Stack.Navigator>
+      <StatusBar backgroundColor="black" barStyle="light-content" />
+      {token === null ? <AuthStack /> : <MyStack />}
     </NavigationContainer>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#b0006d',
-    alignItems: 'center',
-    borderRadius: 5,
-  },
-  contents: {
-    fontSize: 24,
-    fontWeight: 600,
-  },
-  warpper: {
-    justifyContent: 'center',
-    textAlign: 'center',
-  },
-  hitest: {
-    color: '#fff',
-    fontWeight: 'bold',
-    // fontStyle: 'italic',
-    // fontFamily: 'bold',
-    fontSize: 20,
-    justifyContent: 'center',
-    textAlign: 'center',
-    marginBottom: 20,
-    marginTop: 100,
-  },
-  user: {
-    color: '#929292',
-    justifyContent: 'center',
-    textAlign: 'center',
-    fontSize: 20,
-    padding: 4,
-    fontWeight: '400',
-  },
-  form: {
-    justifyContent: 'center',
-    marginTop: 15,
-  },
-  textinput: {
-    backgroundColor: '#fff',
-    position: 'relative',
-    width: 340,
-    height: 50,
-    borderRadius: 10,
-    justifyContent: 'center',
-    textAlign: 'center',
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  btndn: {
-    position: 'relative',
-    backgroundColor: '#929229',
-    width: 340,
-    height: 50,
-    marginTop: 10,
-    borderRadius: 40,
-    color: '#fff',
-    justifyContent: 'center',
-    textAlign: 'center',
-    paddingTop: 15,
-  },
-  action: {
-    width: 360,
-    height: 40,
-    flexDirection: 'row',
-    textAlign: 'center',
-    justifyContent: 'center',
-    marginTop: 15,
-  },
-  support1: {
-    textAlign: 'left',
-    marginRight: 80,
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '200',
-  },
-  support2: {
-    textAlign: 'right',
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '200',
-  },
-});
+const App = () => {
+  return (
+    <Provider store={store}>
+      <RootNavigation />
+    </Provider>
+  );
+};
+
+export default App;
