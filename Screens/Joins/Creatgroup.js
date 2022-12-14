@@ -1,6 +1,6 @@
 import React from 'react';
-import {View, Text, TextInput, TouchableOpacity} from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
+import {View, Text, TextInput, TouchableOpacity, ScrollView} from 'react-native';
+// import {ScrollView} from 'react-native-gesture-handler';
 import {COLORS, icons, FONTS, SIZES, images} from '../../constants';
 import {Dropdown} from 'react-native-element-dropdown';
 import {IconButton, IconLabel, Line} from '../../Components';
