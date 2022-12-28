@@ -101,13 +101,13 @@ const FilterUpdate = ({
   khoa.forEach(key => {
     data.push({key: `${key.id}`, value: `${key.name}`});
   });
+  console.log(data);
   const key = useRef();
   const value = useRef();
+  // key.current = user?.faculty_id;
   const [isFocus, setIsFocus] = useState(false);
+  key.current = user?.faculty_id;
   // console.log(data);
-  // useEffect(() => {
-
-  // });
   const [birthday, setBirthday] = useState(user.birthday);
   const [selected, setSelected] = useState('');
   const [phone, setPhone] = useState(user.phone_number);
@@ -118,7 +118,14 @@ const FilterUpdate = ({
   const [address, setAddress] = useState(user.address);
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
-  // const dispatch = useDispatch();
+  useEffect(() => {
+    if (user != null) {
+      setFal(`${user.faculty_id}`);
+      console.log(fal);
+      key.current = user?.faculty_id;
+      setIsFocus(true);
+    }
+  }, [user]);
   const onChange = (event, selectedDate) => {
     setShow(false);
     const currentDate = selectedDate || date;
@@ -163,9 +170,6 @@ const FilterUpdate = ({
       ],
     };
   });
-  const Update = () => {
-    update();
-  };
   return (
     <Animated.View
       style={[
@@ -479,6 +483,7 @@ const FilterUpdate = ({
                   marginTop: 10,
                   // backgroundColor: 'red',
                 }}>
+                {/* {console.log(data)} */}
                 <Dropdown
                   style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
                   placeholderStyle={styles.placeholderStyle}
@@ -490,22 +495,14 @@ const FilterUpdate = ({
                   maxHeight={300}
                   labelField="value"
                   valueField="key"
-                  placeholder={!isFocus ? 'Chọn Khoa' : value.current}
+                  placeholder={'Chọn Khoa'}
                   searchPlaceholder="Search..."
-                  value={value.current}
-                  onFocus={() => setIsFocus(false)}
-                  onBlur={() => setIsFocus(true)}
+                  value={fal}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
                   onChange={item => {
-                    value.current = item.value;
-                    console.log(value.current);
-                    data.forEach(key1 => {
-                      if (key1.value == item.value) {
-                        console.log(key1.key);
-                        key.current = item.key;
-                        console.log(key.current);
-                        setIsFocus(false);
-                      }
-                    });
+                    setIsFocus(false);
+                    setFal(item.key);
                   }}
                 />
               </View>
@@ -530,16 +527,17 @@ const FilterUpdate = ({
                   borderRadius: 28,
                   marginTop: 18,
                 }}
-                onPress={() => {
+                onPress={async () => {
                   let user1 = {};
                   (user1.phone_number = phone),
                     (user1.address = address),
                     (user1.birthday = birthday),
                     (user1.gender = gender === 'Nữ' ? 0 : 1),
                     (user1.full_name = name),
-                    (user1.faculty_id = user.faculty_id),
+                    (user1.faculty_id = fal),
+                    (user1.avatar_url = user.avatar_url),
                     console.log(user1);
-                  UpdateUser(user1);
+                  await UpdateUser(user1);
                   user1 = {};
                   filterSharevalue2.value = withTiming(SIZES.height, {
                     duration: 500,
@@ -549,7 +547,7 @@ const FilterUpdate = ({
                     withTiming(SIZES.height, {duration: 100}),
                   );
                   Keyboard.dismiss();
-                  // console.log(GetInfoUser());
+                  update();
                 }}>
                 <Text
                   style={{

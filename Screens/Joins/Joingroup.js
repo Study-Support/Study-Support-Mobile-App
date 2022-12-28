@@ -48,30 +48,99 @@ import BASE_URL from '../../config';
 import {useEffect, useRef, useState} from 'react';
 import Chapters from '../Course/CourseTabs/Chapters';
 import {ScrollView} from 'react-native-gesture-handler';
+import {DeleteGroupJoin} from '../../store/actions';
 const Joingroup = ({navigation, route}) => {
   const groups = route.params.selectedGroup;
   const data = useRef();
-  data.current = groups;
+  let ansupdate = [];
+  const myanswers = useRef([]);
+  data.current = groups.group;
+  myanswers.current = groups.myAnswers;
   const token = route.params.token;
   const [loading, setLoading] = useState(true);
-  const [khokhan, setKhokhan] = React.useState('');
-  const [mongmuon, setMongmuon] = React.useState('');
-  const [ykien, setYkien] = React.useState('');
-  // console.log(groups.survey_questions);
-  // console.log(token);
-  // if (loading) {
-  //   return (
-  //     <View style={{flex: 1, justifyContent: 'center'}}>
-  //       <ActivityIndicator size="large" color={COLORS.primary} />
-  //     </View>
-  //   );
-  // }
-  // if (data.current.answers != null && data.current !== undefined) {
-  //   navigation.navigate('GroupDetail', {
-  //     selectedGroup: data.current,
-  //     token: token,
-  //   });
-  // }
+  const [join1, setJoin1] = React.useState(myanswers.current[0]?.answer);
+  const [join2, setJoin2] = React.useState(myanswers.current[1]?.answer);
+  const [join3, setJoin3] = React.useState(myanswers.current[2]?.answer);
+  const [join4, setJoin4] = React.useState(myanswers.current[3]?.answer);
+  const [join5, setJoin5] = React.useState(myanswers.current[4]?.answer);
+  const [button, setButton] = React.useState('Tham Gia');
+  useEffect(() => {
+    if (groups.myAnswers?.length != 0) {
+      setButton('Cập Nhật');
+    } else {
+      setButton('Tham Gia');
+    }
+    console.log(button);
+  }, [button]);
+  if (myanswers.current.length != 0) {
+    ansupdate = myanswers.current;
+  } else {
+    ansupdate = data.current?.survey_questions;
+  }
+  async function fetchData(id) {
+    // console.log(ansupdate);
+    if (button == 'Tham Gia') {
+      await fetch(`${BASE_URL}/groups/${id}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          answers: ansupdate,
+        }),
+      })
+        .then(response => {
+          if (response.status === 200) {
+            alert('Yêu Cầu Tham Gia Thành Công');
+            return response.json();
+          } else {
+            alert('Yêu Cầu Tham Gia Thất bại !');
+            return response.json();
+          }
+        })
+        .then(response => {
+          console.log(response.status);
+          if (response.status == 200) {
+            // alert('Yêu Cầu Tham Gia Thành Công');
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    } else {
+      await fetch(`${BASE_URL}/groups/${id}/join`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          answers: ansupdate,
+        }),
+      })
+        .then(response => {
+          if (response.status === 200) {
+            alert('Cập Nhật Thành Công');
+            return response.json();
+          } else {
+            alert('Cập Nhật Thất bại');
+            return response.json();
+          }
+        })
+        .then(response => {
+          if (response.status == 200) {
+            alert('Cập Nhật Thành Công');
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+      ansupdate = [];
+    }
+  }
   function renderHeaderComponents() {
     return (
       <View
@@ -123,9 +192,13 @@ const Joingroup = ({navigation, route}) => {
               borderWidth: 7,
             }}
             onPress={() => {
-              if (data.current.is_creator) {
-                console.log('Nó đó');
-                // dispatch(DeleteGroup());
+              if (myanswers.current.length != 0) {
+                DeleteGroupJoin(data.current?.id);
+                navigation.goBack();
+                route.params.Updatelist();
+                // console.log(data.current?.id);
+              } else {
+                navigation.goBack();
               }
             }}
           />
@@ -204,7 +277,7 @@ const Joingroup = ({navigation, route}) => {
               flex: 1,
             }}>
             <Text style={{...FONTS.h2, color: COLORS.black}}>
-              {data.current?.topic} - {data.current.subject}
+              {data.current?.topic} - {data.current?.subject}
             </Text>
             <View
               style={{
@@ -315,7 +388,7 @@ const Joingroup = ({navigation, route}) => {
               justifyContent: 'center',
             }}>
             <Text style={{...FONTS.h2, color: COLORS.black}}>
-              Thông Tin : {data.current.information}
+              Thông Tin : {data.current?.information}
             </Text>
           </View>
           <View
@@ -370,6 +443,7 @@ const Joingroup = ({navigation, route}) => {
               iconStyle={{
                 width: 25,
                 height: 25,
+                tintColor: null,
               }}
               labelStyle={{
                 ...FONTS.h3,
@@ -383,7 +457,7 @@ const Joingroup = ({navigation, route}) => {
                 textAlign: 'center',
                 padding: 5,
                 color: COLORS.black,
-                marginRight: 120,
+                marginRight: 30,
               }}>
               {data.current?.faculty}
             </Text>
@@ -430,7 +504,7 @@ const Joingroup = ({navigation, route}) => {
                       {item?.full_name} - {item?.faculty}
                     </Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <IconButton
+                      {/* <IconButton
                         icon={icons.star}
                         iconStyle={{
                           tintColor: COLORS.primary2,
@@ -450,14 +524,14 @@ const Joingroup = ({navigation, route}) => {
                           justifyContent: 'center',
                         }}>
                         rating: {item?.rating == null ? 0 : 1}
-                      </Text>
+                      </Text> */}
                     </View>
                   </View>
                 </View>
               );
             })}
           </View>
-          <View style={{paddingHorizontal: SIZES.padding}}>
+          {/* <View style={{paddingHorizontal: SIZES.padding}}>
             <Line
               lineStyle={{
                 height: 2,
@@ -579,7 +653,7 @@ const Joingroup = ({navigation, route}) => {
                 {ykien.length}/100 Characters
               </Text>
             </View>
-          </View>
+          </View> */}
           <View style={{paddingHorizontal: SIZES.padding}}>
             <Line
               lineStyle={{
@@ -592,6 +666,9 @@ const Joingroup = ({navigation, route}) => {
               Survey Questions
             </Text>
             {data.current?.survey_questions.map((item, index) => {
+              if (myanswers.current.length != 0) {
+                ansupdate = myanswers.current;
+              }
               return (
                 <View
                   key={`Groups-${index}`}
@@ -626,17 +703,65 @@ const Joingroup = ({navigation, route}) => {
                         placeholder={'ý kiến'}
                         maxLength={100}
                         multiline={true}
-                        borderWidth={2}
-                        onChangeText={text => setText(text)}
+                        defaultValue={
+                          myanswers.current.find(
+                            ele => ele.content == item.content,
+                          )?.answer
+                        }
+                        borderWidth={3}
+                        onChangeText={text => {
+                          if (index == 0) {
+                            setJoin1(text);
+                          } else if (index == 1) {
+                            setJoin2(text);
+                          } else if (index == 2) {
+                            setJoin3(text);
+                          } else if (index == 3) {
+                            setJoin4(text);
+                          } else if (index == 4) {
+                            setJoin5(text);
+                          }
+                        }}
+                        onEndEditing={() => {
+                          console.log(ansupdate);
+                          if (myanswers.current.length != 0) {
+                            if (index == 0) {
+                              ansupdate[index].answer = join1;
+                              ansupdate[index].id =
+                                myanswers.current[index]?.id;
+                            } else if (index == 1) {
+                              ansupdate[index].answer = join2;
+                              ansupdate[index].id =
+                                myanswers.current[index]?.id;
+                            } else if (index == 2) {
+                              ansupdate[index].answer = join3;
+                              ansupdate[index].id =
+                                myanswers.current[index]?.id;
+                            } else if (index == 3) {
+                              ansupdate[index].answer = join4;
+                              ansupdate[index].id =
+                                myanswers.current[index]?.id;
+                            } else if (index == 4) {
+                              ansupdate[index].answer = join5;
+                              ansupdate[index].id =
+                                myanswers.current[index]?.id;
+                            }
+                          } else {
+                            if (index == 0) {
+                              ansupdate[index].answer = join1;
+                            } else if (index == 1) {
+                              ansupdate[index].answer = join2;
+                            } else if (index == 2) {
+                              ansupdate[index].answer = join3;
+                            } else if (index == 3) {
+                              ansupdate[index].answer = join4;
+                            } else if (index == 4) {
+                              ansupdate[index].answer = join5;
+                            }
+                          }
+                          console.log(ansupdate);
+                        }}
                       />
-                      <Text
-                        style={{
-                          color: COLORS.gray80,
-                          textAlign: 'right',
-                          marginRight: 10,
-                        }}>
-                        {text.length}/100 Characters
-                      </Text>
                     </View>
                   </View>
                 </View>
@@ -667,7 +792,16 @@ const Joingroup = ({navigation, route}) => {
                 // position: 'absolute',
               }}
               onPress={() => {
-                navigation.navigate('GroupDetail');
+                fetchData(data.current?.id);
+                setJoin1('');
+                setJoin2('');
+                setJoin3('');
+                setJoin4('');
+                setJoin5('');
+                ansupdate = [];
+                myanswers.current = [];
+
+                navigation.goBack();
               }}>
               <Text
                 style={{
@@ -679,7 +813,7 @@ const Joingroup = ({navigation, route}) => {
                   fontWeight: '600',
                   color: COLORS.black,
                 }}>
-                Tham Gia
+                {button}
               </Text>
             </TouchableOpacity>
             {/* <TouchableOpacity

@@ -23,8 +23,21 @@ const fb = require('../assets/images/l_facebook.png');
 const gg = require('../assets/images/gg.png');
 const inverse_logo = require('../assets/images/inverse_logo.png');
 const white_app_name = require('../assets/images/white_app_name.png');
-
+const Education1 = require('../assets/images/Education1.jpg');
+const Education2 = require('../assets/images/Education2.jpg');
+const Education3 = require('../assets/images/Education3.jpg');
+const BKDN = require('../assets/images/BKDN.png');
+const uploadphoto = require('../assets/images/uploadphoto.png');
+const giaitich1 = require('../assets/images/giaitich1.png');
+const vatli = require('../assets/images/vatli.png');
 export default {
+  Education1,
+  giaitich1,
+  vatli,
+  BKDN,
+  uploadphoto,
+  Education2,
+  Education3,
   bg,
   json_ani,
   bg_pink,

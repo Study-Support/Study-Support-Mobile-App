@@ -1,22 +1,32 @@
 import React from 'react';
 import {View, Text, Image} from 'react-native';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 import {FONTS, SIZES, COLORS} from '../constants';
 
-const IconLabel = ({containerStyle, icon, iconStyle, label, labelStyle}) => {
+const IconsComment = ({
+  containerStyle,
+  icon,
+  iconStyle,
+  label,
+  labelStyle,
+  onPress,
+}) => {
   return (
-    <View
+    <TouchableOpacity
       style={{
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         ...containerStyle,
-      }}>
+      }}
+      onPress={onPress}>
       <Image
         source={icon}
         resizeMode="contain"
         style={{
           width: 20,
           height: 20,
-          tintColor: COLORS.primary,
+          tintColor: COLORS.gray30,
           ...iconStyle,
         }}
       />
@@ -29,7 +39,7 @@ const IconLabel = ({containerStyle, icon, iconStyle, label, labelStyle}) => {
         }}>
         {label}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 };
-export default IconLabel;
+export default IconsComment;

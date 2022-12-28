@@ -9,19 +9,17 @@ import {
 } from 'react-native';
 import Creatgroup from './Screens/Joins/Creatgroup';
 import Login from './Screens/Login/Login';
-import Signup from './Screens/Login/signup';
 import Home from './Screens/Dashboard/Home';
 import 'react-native-gesture-handler';
 import Tabs from './Screens/Dashboard/Tab';
-import Chat from './Screens/Joins/Join';
+import Mymentor from './Screens/Joins/MyMentor';
+import Chat1 from './Screens/Chat/Chat';
+import Messenger from './Screens/Chat/Messenger';
+import ProfileMentor from './Screens/Joins/Showmentor';
 // const Stack = createStackNavigator();
 
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {
-  createStackNavigator,
-  CardStyleInterpolators,
-} from '@react-navigation/stack';
 import {StatusBar, Easing} from 'react-native';
 import {createSharedElementStackNavigator} from 'react-navigation-shared-element';
 import {Provider, useDispatch, useSelector} from 'react-redux';
@@ -35,6 +33,16 @@ import {useNavigation} from '@react-navigation/native';
 import CourseListing from './Screens/Course/CourseListing';
 import GroupDetail from './Screens/Course/GroupDetail';
 import Joingroup from './Screens/Joins/Joingroup';
+import JoinMentor from './Screens/Joins/JoinWithMentor';
+import CreatMentor from './Screens/Joins/CreatMentor';
+import {
+  NotoficationListener,
+  requestUserPermission,
+} from './Screens/PushNotifi/pushnotification';
+import Pdf1 from './Screens/Course/CourseTabs/pdf';
+import Groupmember from './Screens/Joins/Groupmember';
+import Mentorlist from './Screens/Course/Mentorlist';
+import Rating from './Screens/Course/CourseTabs/Rating';
 const Stack = createSharedElementStackNavigator();
 
 const options = {
@@ -74,8 +82,18 @@ const MyStack = () => {
         options={() => options}
       />
       <Stack.Screen
-        name="Joingroup"
-        component={Joingroup}
+        name="Chat1"
+        component={Chat1}
+        // options={() => options}
+      />
+      <Stack.Screen
+        name="Creatgroup"
+        component={Creatgroup}
+        // options={() => options}
+      />
+      <Stack.Screen
+        name="JoinMentor"
+        component={JoinMentor}
         // options={() => options}
       />
       <Stack.Screen
@@ -83,9 +101,40 @@ const MyStack = () => {
         component={GroupDetail}
         // options={() => options}
       />
+      <Stack.Screen
+        name="Pdf1"
+        component={Pdf1}
+        // options={() => options}
+      />
+      <Stack.Screen
+        name="Joingroup"
+        component={Joingroup}
+        // options={() => options}
+      />
+      <Stack.Screen
+        name="Mentorlist"
+        component={Mentorlist}
+        // options={() => options}
+      />
+      <Stack.Screen
+        name="ProfileMentor"
+        component={ProfileMentor}
+        // options={() => options}
+      />
+      <Stack.Screen
+        name="Rating"
+        component={Rating}
+        // options={() => options}
+      />
+      <Stack.Screen
+        name="Groupmember"
+        component={Groupmember}
+        // options={() => options}
+      />
+      <Stack.Screen name="CreatMentor" component={CreatMentor} />
       <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen name="Chat" component={Chat} />
-      <Stack.Screen name="Creatgroup" component={Creatgroup} />
+      <Stack.Screen name="Mymentor" component={Mymentor} />
+      <Stack.Screen name="Messenger" component={Messenger} />
     </Stack.Navigator>
   );
 };
@@ -116,9 +165,11 @@ const RootNavigation = () => {
   };
 
   useEffect(() => {
+    requestUserPermission();
+    NotoficationListener();
     init();
     setLoading(false);
-  },[]);
+  }, []);
 
   if (loading) {
     return (

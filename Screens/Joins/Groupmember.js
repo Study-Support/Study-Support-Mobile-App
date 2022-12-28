@@ -49,83 +49,55 @@ import {useEffect, useRef, useState} from 'react';
 import Chapters from '../Course/CourseTabs/Chapters';
 import {ScrollView} from 'react-native-gesture-handler';
 import {DeleteGroupJoin} from '../../store/actions';
-const JoinMentor = ({navigation, route}) => {
+const Groupmember = ({navigation, route}) => {
   const groups = route.params.selectedGroup;
-  // console.log(groups);
   const data = useRef();
-  const questions = useRef();
   let ansupdate = [];
   const myanswers = useRef([]);
-  data.current = groups?.group;
-  myanswers.current = groups?.myAnswers;
-  // console.log(myanswers.current);
-  const token = route.params?.token;
+  const [urlimage, setUrlimage] = React.useState(null);
+  data.current = groups.group;
+  myanswers.current = groups.myAnswers;
+  const token = route.params.token;
   const [loading, setLoading] = useState(true);
-  const [khokhan, setKhokhan] = React.useState('');
-  const [mongmuon, setMongmuon] = React.useState('');
-  const [ykien, setYkien] = React.useState('');
-  const [button, setButton] = React.useState('Đăng Kí Mentor');
-  const [index1, setIndex1] = React.useState('');
-  const [index2, setIndex2] = React.useState('');
-  const [index3, setIndex3] = React.useState('');
-  const [index4, setIndex4] = React.useState('');
-  const [index5, setIndex5] = React.useState('');
-  // const [state1, dispatch] = React.useReducer(reducer, 0);
-  // const reducer = (state, action) => {
-  //   console.log(action);
-  //   switch (action) {
-  //     case '0':
-  //       console.log(0);
-  //       setIndex1('a');
-  //       return state1 + 1;
-  //     // case '1':
-  //     //   setIndex2(action.payload);
-  //     // case '2':
-  //     //   setIndex3(action.payload);
-  //   }
-  // };
+  const [update, setUpdate] = useState(false);
+  const [button, setButton] = React.useState('Tham Gia');
   useEffect(() => {
-    if (groups.myAnswers?.length != 0) {
-      setButton('Cập Nhật');
-    } else {
-      setButton('Đăng Kí Mentor');
-    }
-    async function fetchData() {
-      await fetch(`${BASE_URL}/mentor-questions`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(response => {
-          if (response.status === 200) {
-            return response.json();
-          } else {
-            console.log(response);
-            return response.json();
-          }
-        })
-        .then(response => {
-          console.log(response.data.data);
-          questions.current = response.data.data;
-        })
-        .catch(err => {
-          console.log(err + 'NO');
-        });
-      if (questions.current?.length != 0) {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, [button]);
-  if (myanswers.current.length != 0) {
-    ansupdate = myanswers.current;
-  } else {
-    ansupdate = questions.current;
-  }
-  console.log(ansupdate);
+    console.log(data.current);
+    // async function fetchDetailGroups(id) {
+    //   await fetch(`${BASE_URL}/groups/${id}`, {
+    //     method: 'GET',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Accept: 'application/json',
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   })
+    //     .then(response => {
+    //       if (response.status === 200) {
+    //         // console.log(response.data);
+    //         return response.json();
+    //       } else {
+    //         console.log(response.status);
+    //         return response.json();
+    //       }
+    //     })
+    //     .then(response => {
+    //       data.current = response.data;
+    //       console.log(response);
+    //       return response.data.group;
+    //     })
+    //     .catch(error => {
+    //       console.log(error);
+    //     });
+    //   setLoading(false);
+    // }
+    // fetchDetailGroups(groups.group?.id);
+    setLoading(false);
+  }, [update]);
+  const Update = () => {
+    setUpdate(!update);
+    setLoading(true);
+  };
   if (loading) {
     return (
       <View style={{flex: 1, justifyContent: 'center'}}>
@@ -133,64 +105,66 @@ const JoinMentor = ({navigation, route}) => {
       </View>
     );
   }
-  async function SignUpMentor(id) {
-    // console.log(ansupdate);
-    if (button == 'Cập Nhật') {
-      await fetch(`${BASE_URL}/groups/${id}/join`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          answers: ansupdate,
-        }),
+  async function Accept(id) {
+    await fetch(`${BASE_URL}/groups/${data.current?.id}/acceptMember`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        account_id: id,
+        accept: true,
+      }),
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // console.log(response.data);
+          return response.json();
+        } else {
+          // console.log(response.status);
+          return response.json();
+        }
       })
-        .then(response => {
-          if (response.status === 200) {
-            alert('Cập Nhật Thành Công');
-            return response.json();
-          } else {
-            console.log(response.status);
-            return response.json();
-          }
-        })
-        .then(response => {
-          console.log(response.meta);
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    } else {
-      await fetch(`${BASE_URL}/groups/${id}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          answers: ansupdate,
-        }),
+      .then(response => {
+        console.log(response);
       })
-        .then(response => {
-          if (response.status === 200) {
-            alert('Đăng Kí Làm Mentor Thành Công');
-            return response.json();
-          } else {
-            alert('Đăng Kí Làm Mentor Thất Bại');
-            return response.json();
-          }
-        })
-        .then(response => {
-          console.log(response);
-        })
-        .catch(error => {
-          console.log(error);
-        });
-      ansupdate = [];
-    }
+      .catch(error => {
+        console.log(error);
+      });
+  }
+  async function Delete(id) {
+    console.log(data.current?.id);
+    console.log(id);
+    await fetch(`${BASE_URL}/user/groups/${data.current?.id}/acceptMember`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        account_id: id,
+        accept: true,
+      }),
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // console.log(response.data);
+          // alert('xóa thành công !');
+          return response.json();
+        } else {
+          // console.log(response.status);
+          return response.json();
+        }
+      })
+      .then(response => {
+        console.log(response);
+      })
+      .catch(error => {
+        console.log(error);
+      });
   }
   function renderHeaderComponents() {
     return (
@@ -243,10 +217,10 @@ const JoinMentor = ({navigation, route}) => {
               borderWidth: 7,
             }}
             onPress={() => {
-              if (myanswers.current?.length != 0) {
-                console.log(data.current?.id);
+              if (myanswers.current.length != 0) {
                 DeleteGroupJoin(data.current?.id);
                 navigation.goBack();
+                route.params?.Updatelist();
               } else {
                 navigation.goBack();
               }
@@ -281,8 +255,12 @@ const JoinMentor = ({navigation, route}) => {
           justifyContent: 'center',
           backgroundColor: COLORS.gray90,
         }}>
-        <ImageBackground
-          source={images.giaitich1}
+        <Image
+          source={
+            groups?.image_url != null
+              ? {uri: groups?.image_url}
+              : images.giaitich1
+          }
           style={{
             width: '100%',
             height: '100%',
@@ -431,7 +409,7 @@ const JoinMentor = ({navigation, route}) => {
           </View>
           <View
             style={{
-              flex: 1,
+              width: '100%',
               //   height: 50,
               //   backgroundColor: 'red',
               flexDirection: 'row',
@@ -448,7 +426,7 @@ const JoinMentor = ({navigation, route}) => {
                 height: 23,
               }}
               labelStyle={{
-                ...FONTS.h4,
+                ...FONTS.h3,
                 color: COLORS.gray80,
               }}
             />
@@ -495,7 +473,7 @@ const JoinMentor = ({navigation, route}) => {
                 textAlign: 'center',
                 padding: 5,
                 color: COLORS.black,
-                marginRight: 10,
+                marginRight: 30,
               }}>
               {data.current?.faculty}
             </Text>
@@ -508,7 +486,7 @@ const JoinMentor = ({navigation, route}) => {
                 color: COLORS.black,
                 marginRight: 30,
               }}>
-              Group :{data.current?.self_study == 1 ? 'Tự học' : 'Mentor'}
+              Group :{data.current?.self_study == 0 ? 'Tự học' : 'Không tự'}
             </Text>
           </View>
           <View style={{paddingHorizontal: SIZES.padding}}>
@@ -553,94 +531,86 @@ const JoinMentor = ({navigation, route}) => {
                 marginVertical: SIZES.base,
               }}
             />
-            <Text
-              style={{...FONTS.h2, color: COLORS.black, textAlign: 'center'}}>
-              Survey Questions For Mentor
-            </Text>
-            {questions.current?.map((item, index) => {
-              if (myanswers.current.length != 0) {
-                ansupdate = myanswers.current;
-              }
-              console.log(ansupdate);
-              return (
-                <View
-                  key={`Groups-${index}`}
-                  style={
-                    {
-                      // alignItems: 'center',
-                      // height: 30,
-                    }
-                  }>
+            {data.current?.is_creator &&
+              data.current?.membersWaiting.length != 0 && (
+                <Text
+                  style={{
+                    ...FONTS.h2,
+                    color: COLORS.black,
+                    textAlign: 'center',
+                  }}>
+                  Member Waiting
+                </Text>
+              )}
+            {data.current?.is_creator &&
+              data.current?.membersWaiting.map((item, index) => {
+                return (
                   <View
+                    key={`Groups-${index}`}
                     style={{
                       flex: 1,
-                      paddingHorizontal: SIZES.padding,
                       // alignItems: 'center',
-                      // height: 40,
-                      // justifyContent: 'space-between',
+                      // height: 30,
                     }}>
-                    <Text style={{...FONTS.h3, color: COLORS.primary2}}>
-                      {`Question-${index + 1}`} - {item?.content}
-                    </Text>
-                    <View style={{flexDirection: 'column'}}>
-                      <TextInput
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        width: '100%',
+                        // paddingHorizontal: SIZES.padding,
+                        alignItems: 'center',
+                        height: 40,
+                        justifyContent: 'space-between',
+                      }}>
+                      <Text style={{...FONTS.h3, color: COLORS.black}}>
+                        {item?.full_name} - {item?.faculty}
+                      </Text>
+                      <View
                         style={{
-                          borderWidth: 1,
-                          borderColor: COLORS.primary,
-                          borderRadius: 25,
-                          fontStyle: 'italic',
-                          fontSize: 16,
-                          paddingHorizontal: 15,
-                        }}
-                        numberOfLines={2}
-                        placeholder={'ý kiến'}
-                        maxLength={100}
-                        multiline={true}
-                        borderWidth={2}
-                        defaultValue={
-                          myanswers.current?.find(
-                            ele => ele.content == item.content,
-                          )?.answer
-                        }
-                        // value={
-                        //   index == 0 ? index1 : index == 1 ? index2 : index3
-                        // }
-                        onChangeText={text => {
-                          if (index == 0) {
-                            setIndex1(text);
-                          } else if (index == 1) {
-                            setIndex2(text);
-                          } else if (index == 2) {
-                            setIndex3(text);
-                          } else if (index == 3) {
-                            setIndex4(text);
-                          } else if (index == 4) {
-                            setIndex5(text);
-                          }
-                        }}
-                        onEndEditing={() => {
-                          if (index == 0) {
-                            ansupdate[index].answer = index1;
-                          } else if (index == 1) {
-                            ansupdate[index].answer = index2;
-                          } else if (index == 2) {
-                            ansupdate[index].answer = index3;
-                          } else if (index == 3) {
-                            ansupdate[index].answer = index4;
-                          } else if (index == 4) {
-                            ansupdate[index].answer = index5;
-                          }
-                          // ansupdate[index].answer =
-                          //   index == 0 ? index1 : index == 1 ? index2 : index3;
-                          console.log(ansupdate);
-                        }}
-                      />
+                          // flex: 1,
+                          flexDirection: 'row',
+                          alignItems: 'flex-start',
+                          // backgroundColor: 'red',
+                        }}>
+                        <IconButton
+                          icon={icons.xoa}
+                          iconStyle={{
+                            tintColor: null,
+                          }}
+                          containerStyle={{
+                            width: 50,
+                            height: 50,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            //   backgroundColor: 'red',
+                            //   marginLeft: 10,
+                          }}
+                          onPress={async () => {
+                            console.log(item?.id);
+                            await Delete([item?.id]);
+                            Update();
+                          }}
+                        />
+                        <IconButton
+                          icon={icons.checked}
+                          iconStyle={{
+                            tintColor: COLORS.primary,
+                          }}
+                          containerStyle={{
+                            width: 50,
+                            height: 50,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            //   marginLeft: 20,
+                          }}
+                          onPress={() => {
+                            Accept(item?.id);
+                          }}
+                        />
+                      </View>
                     </View>
                   </View>
-                </View>
-              );
-            })}
-            {/* {console.log(ansupdate)} */}
+                );
+              })}
           </View>
           <View
             style={{
@@ -651,68 +621,8 @@ const JoinMentor = ({navigation, route}) => {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-around',
-            }}>
-            <TouchableOpacity
-              style={{
-                borderRadius: 25,
-                backgroundColor: COLORS.primary,
-                width: 120,
-                height: 50,
-                justifyContent: 'center',
-                textAlign: 'center',
-                borderColor: 'green',
-                borderWidth: 1,
-                // marginLeft: 120,
-                // position: 'absolute',
-              }}
-              onPress={() => {
-                console.log(data.current?.id);
-                SignUpMentor(data.current?.id);
-                navigation.goBack();
-              }}>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  justifyContent: 'center',
-                  // marginLeft: 18,
-                  fontSize: 14,
-                  fontStyle: 'italic',
-                  fontWeight: '600',
-                  color: COLORS.black,
-                }}>
-                {button}
-              </Text>
-            </TouchableOpacity>
-            {/* <TouchableOpacity
-              style={{
-                borderRadius: 25,
-                backgroundColor: COLORS.primary,
-                width: 120,
-                height: 50,
-                justifyContent: 'center',
-                // textAlign: 'center',
-                borderColor: 'green',
-                borderWidth: 1,
-                // marginLeft: 120,
-                // position: 'absolute',
-              }}
-              onPress={() => {
-                // navigation.navigate('Login');
-              }}>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  justifyContent: 'center',
-                  // marginLeft: 18,
-                  fontSize: 14,
-                  fontStyle: 'italic',
-                  fontWeight: '600',
-                  color: COLORS.black,
-                }}>
-                Đăng kí làm Mentor
-              </Text>
-            </TouchableOpacity> */}
-          </View>
+            }}
+          />
         </View>
       </ScrollView>
     );
@@ -729,4 +639,4 @@ const JoinMentor = ({navigation, route}) => {
     </View>
   );
 };
-export default JoinMentor;
+export default Groupmember;

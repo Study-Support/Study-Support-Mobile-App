@@ -52,11 +52,48 @@ const sun = require('../assets/icons/sun.png');
 const time = require('../assets/icons/time.png');
 const web_design = require('../assets/icons/web_design.png');
 const house = require('../assets/icons/house.jpg');
-
+const add = require('../assets/icons/add.png');
+const birthday = require('../assets/icons/birthday.png');
+const dien = require('../assets/icons/dien.png');
+const hoa = require('../assets/icons/hoa.png');
+const khoa = require('../assets/icons/khoa.png');
+const mentor = require('../assets/icons/mentor.png');
+const nhanxet = require('../assets/icons/nhanxet.png');
+const searchblue = require('../assets/icons/search.jpg');
+const tryy = require('../assets/icons/try.png');
+const houseblue2 = require('../assets/icons/houseblue2.png');
+const house_blue = require('../assets/icons/house_blue.png');
+const logout = require('../assets/icons/logout.png');
+const join = require('../assets/icons/join.png');
+const gender = require('../assets/icons/gender.png');
+const address = require('../assets/icons/address.png');
+const xoa = require('../assets/icons/xoa.png');
+const messenger = require('../assets/icons/messenger.png');
+const refresh = require('../assets/icons/refresh.png');
+const upload = require('../assets/icons/upload.png');
 export default {
   all,
+  upload,
+  refresh,
+  xoa,
+  messenger,
+  address,
+  gender,
+  logout,
+  join,
+  house_blue,
+  houseblue2,
+  birthday,
+  dien,
+  hoa,
+  khoa,
+  mentor,
+  nhanxet,
+  searchblue,
+  tryy,
   search1,
   house,
+  add,
   animation,
   back,
   call,

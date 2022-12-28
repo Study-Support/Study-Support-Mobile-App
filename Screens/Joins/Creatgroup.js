@@ -1,75 +1,136 @@
 import React from 'react';
-import {View, Text, TextInput, TouchableOpacity} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, Image} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {COLORS, icons, FONTS, SIZES, images} from '../../constants';
 import {Dropdown} from 'react-native-element-dropdown';
 import {IconButton, IconLabel, Line} from '../../Components';
 import {StyleSheet} from 'react-native';
 import BASE_URL from '../../config';
-import {Creatgroups} from '../../store/actions';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {Creatgroups, Deletegroups, Updategroups} from '../../store/actions';
 import {useDispatch, useSelector, Provider} from 'react-redux';
 import {useRef, usSetate, useEffect} from 'react';
-const Creatgroup = () => {
-  // const [subject, setSubject] = React.useState([]);
+import {useMemo} from 'react';
+import {
+  firebaseDatabase,
+  firebaseSet,
+  firebaseDatabaseRef,
+  child,
+  get,
+  onValue,
+  storage,
+  stRef,
+  uploadBytes,
+  getDownloadURL,
+  uploadBytesResumable,
+} from '../../firebase/firebase';
+const Creatgroup = ({navigation, route}) => {
+  const {selectedGroup} = route?.params;
+  const time = new Date().getTime();
+  // console.log(selectedGroup);
+  let group = selectedGroup;
   const [mucdich, setMucdich] = React.useState('');
+  const [urlimage, setUrlimage] = React.useState(null);
   const [thongtin, setThongtin] = React.useState('');
   const [thoigian, setThoigian] = React.useState('');
   const [diadiem, setDiadiem] = React.useState('');
+  const [survey1, setSurvey1] = React.useState('');
+  const [survey2, setSurvey2] = React.useState('');
+  const [survey3, setSurvey3] = React.useState('');
+  const [survey4, setSurvey4] = React.useState('');
+  const [survey5, setSurvey5] = React.useState('');
+  const myanswers = useRef([]);
+  myanswers.current = group?.survey_questions;
+  // console.log(myanswers.current);
   const [isFocus1, setIsFocus1] = React.useState(false);
   const [isFocus2, setIsFocus2] = React.useState(false);
   const [agree, setAgree] = React.useState(false);
+  const [questions, setQuestions] = React.useState('');
+  const [button, setButton] = React.useState('Đăng Kí');
+  const survey_questions = useRef([{}, {}, {}, {}, {}]);
+  // console.log(survey_questions.current[0]);
+  let question = useRef([]);
+  const [num, setNum] = React.useState(() => 0);
+  let i = num;
   let data = [];
   const sub = useRef();
   const self_study = useRef();
   const valuesub = useRef();
   const valuefal = useRef();
   const khoa = useSelector(state => state.Reducers.getFaculties);
+  // console.log(khoa);
   const token = useSelector(state => state.Reducers.authToken);
-  console.log(khoa.subjects);
   useEffect(() => {
-    fetch(`${BASE_URL}/groups/5/join`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        // confirm: 'agree',
-        // faculty_id: 1,
-        // information: 'thongtin',
-        // location_study: 'diadiem',
-        // self_study: 0,
-        // subject_id: 5,
-        // survey_questions: [
-        //   {question: 'ngu nhu bo'},
-        //   {question: 'ai muon'},
-        //   {question: 'tinh sao'},
-        // ],
-        // time_study: 'thoigian',
-        // topic: 'mucdich',
-        answers: [{answers: '@@@'}, {answers: 'qua de'}, {answers: 'qua de'}],
-      }),
-    })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          // console.log(response);
-          return response.json();
-        }
-      })
-      .then(response => {
-        console.log(response.meta);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    // console.log(group);
+    if (group != undefined && group.length != 0) {
+      setAgree(true);
+      setMucdich(group?.topic);
+      setThongtin(group?.information);
+      setDiadiem(group?.location_study);
+      setThoigian(group?.time_study);
+      setButton('Cập Nhật');
+      setUrlimage(group?.image_url);
+      self_study.current = group?.self_study;
+      setIsFocus(true);
+      if (self_study.current == 0) {
+        setIsFocus1(true);
+        setIsFocus2(false);
+      } else {
+        setIsFocus1(false);
+        setIsFocus2(true);
+      }
+      sub.current = khoa.find(ele => ele.id === group?.faculty_id)?.subjects;
+      valuefal.current = group?.faculty_id;
+      valuesub.current = group?.subject_id;
+    } else {
+      setButton('Đăng Kí');
+    }
   }, []);
   khoa.forEach(key => {
-    data.push({key: `${key.id}`, value: `${key.name}`});
+    data.push({key: key.id, value: `${key.name}`});
   });
+  // console.log(data);
   const [isFocus, setIsFocus] = React.useState(false);
+  const UpdateAvartar = async () => {
+    let source = [];
+    let options = {
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
+    launchImageLibrary(options, async response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+        alert(response.customButton);
+      } else {
+        // console.log('response', JSON.stringify(response));
+        source = response;
+        console.log(source.assets[0].uri);
+        try {
+          const response = await fetch(source.assets[0].uri);
+          const blobFile = await response.blob();
+          const storageRef = stRef(
+            storage,
+            'groups/ImageBackground/' + `${time}.jpg`,
+          );
+          await uploadBytesResumable(storageRef, blobFile);
+        } catch (e) {
+          console.log(e);
+        }
+        getDownloadURL(
+          stRef(storage, 'groups/ImageBackground/' + `${time}.jpg`),
+        ).then(function (url) {
+          console.log(url);
+          setUrlimage(url);
+        });
+      }
+    });
+  };
   return (
     <ScrollView
       style={{
@@ -91,11 +152,12 @@ const Creatgroup = () => {
           marginTop: 10,
           // backgroundColor: 'red',
         }}>
-        {/* <View style={styles.container1}> */}
-        {/* {renderLabel()} */}
         <View
           style={{
             height: 30,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}>
           <Text
             style={{
@@ -103,9 +165,38 @@ const Creatgroup = () => {
               textAlign: 'center',
               justifyContent: 'center',
               color: COLORS.primary3,
+              marginLeft: 100,
             }}>
             Đăng Kí Nhu Cầu
           </Text>
+          <View>
+            <IconButton
+              icon={icons.xoa}
+              containerStyle={{
+                width: 50,
+                height: 50,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              iconStyle={{
+                width: 30,
+                height: 30,
+                tintColor: null,
+                borderRadius: 20,
+                borderColor: 'red',
+                borderWidth: 7,
+              }}
+              onPress={async () => {
+                if (group != undefined && group.length != 0) {
+                  await Deletegroups(group?.id);
+                  route.params.Updatelist();
+                  navigation.goBack();
+                } else {
+                  navigation.goBack();
+                }
+              }}
+            />
+          </View>
         </View>
         <View>
           <Text
@@ -138,7 +229,7 @@ const Creatgroup = () => {
           maxHeight={300}
           labelField="value"
           valueField="key"
-          placeholder={!isFocus ? 'Chọn Khoa' : '...'}
+          placeholder={'Chọn Khoa'}
           searchPlaceholder="Search..."
           value={valuefal.current}
           onFocus={() => setIsFocus(true)}
@@ -151,18 +242,9 @@ const Creatgroup = () => {
                 console.log(key.subjects);
                 sub.current = key.subjects;
                 setIsFocus(false);
-                // sub.current.forEach(ele => {
-                //   // console.log(ele);
-                //   if (ele.id == key.key) {
-                //     setSubject([ele]);
-                //     console.log(subject);
-                //   }
-                // });
-                // console.log(subject);
               }
             });
           }}
-          // renderLeftIcon={() => ()}
         />
       </View>
       <View style={{padding: 10, marginTop: 10}}>
@@ -217,7 +299,7 @@ const Creatgroup = () => {
             }}
             onPress={() => {
               self_study.current = 0;
-              console.log(self_study.current);
+              // console.log(self_study.current);
               setIsFocus1(true);
               setIsFocus2(false);
             }}
@@ -253,6 +335,33 @@ const Creatgroup = () => {
             - Nhóm tự học
           </Text>
         </View>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            position: 'absolute',
+            // backgroundColor: 'red',
+            width: 80,
+            height: 80,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 300,
+            marginTop: 100,
+          }}
+          onPress={() => {
+            UpdateAvartar();
+          }}>
+          <Image
+            source={urlimage == null ? images.uploadphoto : {uri: urlimage}}
+            style={{
+              position: 'relative',
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              borderWidth: 1,
+              borderColor: COLORS.white,
+            }}
+          />
+        </TouchableOpacity>
       </View>
       <View style={{paddingHorizontal: 10}}>
         <View>
@@ -297,12 +406,13 @@ const Creatgroup = () => {
           maxLength={100}
           multiline={true}
           borderWidth={2}
+          defaultValue={group?.topic}
           placeholder={'Mục đích'}
           onChangeText={text => setMucdich(text)}
         />
         <Text
           style={{color: COLORS.gray80, textAlign: 'right', marginRight: 10}}>
-          {mucdich.length}/100 Characters
+          {mucdich?.length}/100 Characters
         </Text>
       </View>
       <View style={{paddingHorizontal: 10}}>
@@ -327,13 +437,14 @@ const Creatgroup = () => {
           numberOfLines={3}
           placeholder={'Thông tin cụ thể'}
           maxLength={100}
+          defaultValue={group?.information}
           multiline={true}
           borderWidth={2}
           onChangeText={text => setThongtin(text)}
         />
         <Text
           style={{color: COLORS.gray80, textAlign: 'right', marginRight: 10}}>
-          {thongtin.length}/100 Characters
+          {thongtin?.length}/100 Characters
         </Text>
       </View>
       <View style={{paddingHorizontal: 10}}>
@@ -359,12 +470,13 @@ const Creatgroup = () => {
           placeholder={'Thời gian'}
           maxLength={100}
           multiline={true}
+          defaultValue={group?.time_study}
           borderWidth={2}
           onChangeText={text => setThoigian(text)}
         />
         <Text
           style={{color: COLORS.gray80, textAlign: 'right', marginRight: 10}}>
-          {thoigian.length}/100 Characters
+          {thoigian?.length}/100 Characters
         </Text>
       </View>
       <View style={{paddingHorizontal: 10}}>
@@ -390,46 +502,264 @@ const Creatgroup = () => {
           placeholder={'Địa điểm học'}
           maxLength={100}
           multiline={true}
+          defaultValue={group?.location_study}
           borderWidth={2}
           onChangeText={text => setDiadiem(text)}
         />
         <Text
           style={{color: COLORS.gray80, textAlign: 'right', marginRight: 10}}>
-          {diadiem.length}/100 Characters
+          {diadiem?.length}/100 Characters
         </Text>
       </View>
-      <View
-        style={{
-          padding: 0,
-          flexDirection: 'row',
-          justifyContent: 'space-around',
-        }}>
-        <Text
+      {button == 'Đăng Kí' && (
+        <View
           style={{
-            ...FONTS.h3,
-            // marginTop: 10,
-            paddingHorizontal: 2,
-            color: COLORS.primary2,
+            padding: 10,
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'center',
           }}>
-          -Thêm câu hỏi duyệt thành viên vào nhóm ?
-        </Text>
-        <IconButton
-          icon={icons.right_arrow}
-          label={'Add'}
-          iconStyle={{
-            height: 30,
-            width: 60,
-            tintColor: COLORS.primary,
-          }}
-          containerStyle={{
-            borderRadius: 20,
-            borderWidth: 2,
-            borderColor: COLORS.primary,
-          }}
-          onPress={{}}
-        />
-      </View>
-      {}
+          <Text
+            style={{
+              ...FONTS.h3,
+              // marginTop: 10,
+              paddingHorizontal: 2,
+              color: COLORS.primary2,
+            }}>
+            -Thêm câu hỏi duyệt thành viên vào nhóm ?
+          </Text>
+          <IconButton
+            icon={icons.add}
+            label={'Add'}
+            iconStyle={{
+              height: 30,
+              width: 30,
+              tintColor: null,
+            }}
+            containerStyle={{
+              borderRadius: 10,
+              borderWidth: 0,
+              borderColor: COLORS.primary,
+            }}
+            onPress={() => {
+              if (i < 5) {
+                setNum(i + 1);
+              }
+              // setRenderTasks(() => taskcreate(0));
+            }}
+          />
+        </View>
+      )}
+      {button == 'Cập Nhật' && (
+        <View
+          style={{
+            padding: 10,
+            // flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'center',
+          }}>
+          <Text
+            style={{
+              ...FONTS.h2,
+              // marginTop: 10,
+              paddingHorizontal: 2,
+              color: COLORS.primary3,
+            }}>
+            Survey-Question
+          </Text>
+          {group?.survey_questions?.map((item, index) => {
+            return (
+              <View
+                key={`Question-${index}`}
+                style={{
+                  flex: 1,
+                  marginTop: 10,
+                  // backgroundColor: 'red',
+                  width: '100%',
+                }}>
+                <View style={{paddingHorizontal: 10}}>
+                  <Text
+                    style={{
+                      ...FONTS.h3,
+                      // marginTop: 10,
+                      paddingHorizontal: 2,
+                      color: COLORS.primary2,
+                    }}>
+                    Câu hỏi số {index + 1}
+                  </Text>
+                  <TextInput
+                    style={{
+                      borderWidth: 1,
+                      borderColor: COLORS.primary,
+                      borderRadius: 25,
+                      fontStyle: 'italic',
+                      fontSize: 16,
+                      paddingHorizontal: 15,
+                    }}
+                    numberOfLines={3}
+                    placeholder={'Thông tin cụ thể'}
+                    maxLength={100}
+                    onEndEditing={() => {
+                      if (index == 0) {
+                        myanswers.current[index].content = survey1;
+                      } else if (index == 1) {
+                        myanswers.current[index].content = survey2;
+                      } else if (index == 2) {
+                        myanswers.current[index].content = survey3;
+                      } else if (index == 3) {
+                        myanswers.current[index].content = survey4;
+                      } else if (index == 4) {
+                        myanswers.current[index].content = survey5;
+                      }
+                      console.log(myanswers.current);
+                    }}
+                    defaultValue={
+                      myanswers.current.find(ele => ele.id === item.id)?.content
+                    }
+                    multiline={true}
+                    borderWidth={2}
+                    onChangeText={text => {
+                      if (index == 0) {
+                        setSurvey1(text);
+                      } else if (index == 1) {
+                        setSurvey2(text);
+                      } else if (index == 2) {
+                        setSurvey3(text);
+                      } else if (index == 3) {
+                        setSurvey4(text);
+                      } else if (index == 4) {
+                        setSurvey5(text);
+                      }
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: COLORS.gray80,
+                      textAlign: 'right',
+                      marginRight: 10,
+                    }}>
+                    {thongtin?.length}/100 Characters
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
+      {/* {question.map((item, index) => {
+        return (
+          <View
+            key={`Question-${index}`}
+            style={{
+              flex: 1,
+              marginTop: 10,
+            }}>
+            <View style={{paddingHorizontal: 10}}>
+              <Text
+                style={{
+                  ...FONTS.h3,
+                  // marginTop: 10,
+                  paddingHorizontal: 2,
+                  color: COLORS.primary2,
+                }}>
+                - Thông tin và mục tiêu sau khi kết thúc nhóm học ?
+              </Text>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: COLORS.primary,
+                  borderRadius: 25,
+                  fontStyle: 'italic',
+                  fontSize: 16,
+                  paddingHorizontal: 15,
+                }}
+                numberOfLines={3}
+                placeholder={'Thông tin cụ thể'}
+                maxLength={100}
+                defaultValue={group?.information}
+                multiline={true}
+                borderWidth={2}
+                onChangeText={text => setThongtin(text)}
+              />
+              <Text
+                style={{
+                  color: COLORS.gray80,
+                  textAlign: 'right',
+                  marginRight: 10,
+                }}>
+                {thongtin?.length}/100 Characters
+              </Text>
+            </View>
+          </View>
+        );
+      })} */}
+      {/* {renderTasks} */}
+      {[...Array(i)].map((el, index) => {
+        return (
+          <View
+            key={`Question-${index + 1}`}
+            style={{
+              flex: 1,
+              marginTop: 10,
+            }}>
+            <View style={{paddingHorizontal: 10}}>
+              <Text
+                style={{
+                  ...FONTS.h3,
+                  // marginTop: 10,
+                  paddingHorizontal: 2,
+                  color: COLORS.primary2,
+                }}>
+                Question-{index + 1}
+              </Text>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: COLORS.primary,
+                  borderRadius: 25,
+                  fontStyle: 'italic',
+                  fontSize: 16,
+                  paddingHorizontal: 15,
+                }}
+                numberOfLines={3}
+                // placeholder={'Thông tin cụ thể'}
+                maxLength={100}
+                // value={survey1}
+                // defaultValue={surval.current[index]}
+                multiline={true}
+                borderWidth={2}
+                onChangeText={text => {
+                  if (index == 0) {
+                    setSurvey1(text);
+                  } else if (index == 1) {
+                    setSurvey2(text);
+                  } else if (index == 2) {
+                    setSurvey3(text);
+                  } else if (index == 3) {
+                    setSurvey4(text);
+                  } else if (index == 4) {
+                    setSurvey5(text);
+                  }
+                }}
+                onEndEditing={() => {
+                  if (index == 0) {
+                    survey_questions.current[index].question = survey1;
+                  } else if (index == 1) {
+                    survey_questions.current[index].question = survey2;
+                  } else if (index == 2) {
+                    survey_questions.current[index].question = survey3;
+                  } else if (index == 3) {
+                    survey_questions.current[index].question = survey4;
+                  } else if (index == 4) {
+                    survey_questions.current[index].question = survey5;
+                  }
+                  console.log(survey_questions.current);
+                }}
+              />
+            </View>
+          </View>
+        );
+      })}
       <View
         style={{
           paddingHorizontal: 10,
@@ -467,80 +797,96 @@ const Creatgroup = () => {
           />
         </TouchableOpacity>
       </View>
-      {/* <View style={{padding: 10}}>
-        <TextInput
+      {agree && (
+        <View
           style={{
-            borderWidth: 1,
-            borderColor: COLORS.primary,
-            borderRadius: 25,
-            fontStyle: 'italic',
-            fontSize: 16,
-            paddingHorizontal: 15,
-          }}
-          numberOfLines={3}
-          maxLength={100}
-          multiline={true}
-          borderWidth={2}
-          onChangeText={text => setText(text)}
-        />
-        <Text
-          style={{color: COLORS.gray80, textAlign: 'right', marginRight: 10}}>
-          {text.length}/100 Characters
-        </Text>
-      </View> */}
-      <View
-        style={{
-          flex: 1,
-          width: '100%',
-          // height: 50,
-          // backgroundColor: 'red',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          marginBottom: 80,
-        }}>
-        <TouchableOpacity
-          style={{
-            borderRadius: 25,
-            backgroundColor: COLORS.primary,
-            width: 120,
-            height: 50,
-            justifyContent: 'center',
-            textAlign: 'center',
-            borderColor: 'green',
-            borderWidth: 1,
-            // marginLeft: 120,
-            // position: 'absolute',
-          }}
-          onPress={() => {
-            // navigation.navigate('GroupDetail');
-            let creat = {};
-            creat.confirm = agree ? 1 : 0;
-            creat.faculty_id = valuefal.current;
-            creat.information = thongtin;
-            creat.location_study = diadiem;
-            creat.self_study = self_study.current;
-            creat.subject_id = valuesub.current;
-            creat.survey_questions = [{question: 'a'}];
-            creat.time_study = thoigian;
-            creat.topic = mucdich;
-            console.log(creat);
-            Creatgroups(creat);
+            flex: 1,
+            width: '100%',
+            // height: 50,
+            // backgroundColor: 'red',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+            marginBottom: 80,
           }}>
-          <Text
+          <TouchableOpacity
             style={{
-              textAlign: 'center',
+              borderRadius: 25,
+              backgroundColor: COLORS.primary,
+              width: 120,
+              height: 50,
               justifyContent: 'center',
-              // marginLeft: 18,
-              fontSize: 14,
-              fontStyle: 'italic',
-              fontWeight: '600',
-              color: COLORS.black,
+              textAlign: 'center',
+              borderColor: 'green',
+              borderWidth: 1,
+              // marginLeft: 120,
+              // position: 'absolute',
+            }}
+            onPress={async () => {
+              if (i < 1) {
+                alert('Bạn phải có ít nhất 1 survey-question');
+              }
+              let creat = {};
+              // console.log(agree);
+              creat.confirm = agree ? 1 : 0;
+              creat.faculty_id = valuefal.current;
+              creat.information = thongtin;
+              creat.location_study = diadiem;
+              creat.self_study = self_study.current;
+              creat.subject_id = valuesub.current;
+              creat.survey_questions = [];
+              if (button == 'Đăng Kí') {
+                survey_questions.current.forEach(ele => {
+                  // console.log(ele.question);
+                  if (ele.question != undefined) {
+                    creat.survey_questions.push(ele);
+                  }
+                });
+              } else {
+                creat.survey_questions = myanswers.current;
+              }
+              creat.time_study = thoigian;
+              creat.topic = mucdich;
+              creat.id = group?.id;
+              creat.image_url = urlimage;
+              console.log(creat);
+              if (button == 'Đăng Kí') {
+                await Creatgroups(creat);
+                navigation.goBack();
+              } else {
+                await Updategroups(creat);
+                route.params.Updatelist();
+              }
+              setAgree(false);
+              survey_questions.current = [{}, {}, {}, {}, {}];
+              myanswers.current = [];
+              valuefal.current = null;
+              valuesub.current = null;
+              setThongtin('');
+              setMucdich('');
+              setDiadiem('');
+              setThoigian('');
+              self_study.current = null;
+              setIsFocus1(false);
+              setIsFocus2(false);
+              setIsFocus(false);
+              navigation.goBack();
             }}>
-            Đăng Kí
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text
+              style={{
+                textAlign: 'center',
+                justifyContent: 'center',
+                // marginLeft: 18,
+                fontSize: 14,
+                fontStyle: 'italic',
+                fontWeight: '600',
+                color: COLORS.black,
+              }}>
+              {button}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   );
 };

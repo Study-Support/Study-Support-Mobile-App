@@ -43,9 +43,10 @@ const NotificatonCard = ({icon, label, value, onPress, color}) => {
     <TouchableOpacity
       style={{
         flexDirection: 'row',
-        height: 80,
+        flex: 1,
         alignItems: 'center',
         textAlign: 'center',
+        padding: SIZES.padding,
       }}
       onPress={onPress}>
       {/* <View
